@@ -61,5 +61,15 @@
     "webpack-cli": "^3.3.1",
     "webpack-config-utils": "^2.3.1",
     "webpack-node-externals": "^1.7.2"
+  },
+  "config": {
+    "commitizen": {
+      "path": "./node_modules/cz-conventional-changelog"
+    }
+  },
+  "semistandard": {
+    "env": [
+      "mocha"
+    ]
   }
 }
