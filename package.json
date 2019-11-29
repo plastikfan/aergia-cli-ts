@@ -12,7 +12,7 @@
     "build:p": "webpack -p --env.mode production",
     "build:t": "webpack --config webpack.config.test.js",
     "exec": "node ./dist/aergia-bundle.js",
-    "lint": "npx semistandard --verbose | npx snazzy",
+    "lint": "(npx semistandard --verbose | npx snazzy) && npx tslint -c tslint.json --project tsconfig.json --exclude './lib/**/*.d.ts' './lib/**/*.ts'",
     "fix": "npx semistandard --fix",
     "watch": "webpack --watch --env.mode development",
     "watch:t": "webpack --watch --env.mode development --config webpack.config.test.js",
@@ -35,16 +35,16 @@
     "url": "https://github.com/plastikfan/aergia/issues"
   },
   "homepage": "https://github.com/plastikfan/aergia#readme",
-  "pre-commit": [
-    "lint",
-    "validate",
-    "test"
-  ],
   "devDependencies": {
-    "@commitlint/cli": "^7.5.2",
+    "@commitlint/cli": "^8.3.3",
     "@commitlint/config-conventional": "^7.5.0",
+    "@types/chai": "^4.2.5",
+    "@types/dirty-chai": "^2.0.2",
+    "@types/mocha": "^5.2.7",
+    "@types/sinon": "^7.5.1",
+    "@types/sinon-chai": "^3.2.3",
     "chai": "^4.2.0",
-    "commitizen": "^3.1.1",
+    "commitizen": "^4.0.3",
     "cz-conventional-changelog": "^2.1.0",
     "depcheck": "^0.7.2",
     "dirty-chai": "^2.0.1",
@@ -57,11 +57,20 @@
     "shebang-loader": "0.0.1",
     "sinon": "^7.3.2",
     "snazzy": "^8.0.0",
+    "ts-loader": "^6.2.1",
+    "tslint": "^5.20.1",
+    "tslint-config-semistandard": "^8.0.1",
+    "typescript": "^3.7.2",
     "webpack": "^4.30.0",
     "webpack-cli": "^3.3.1",
     "webpack-config-utils": "^2.3.1",
     "webpack-node-externals": "^1.7.2"
   },
+  "pre-commit": [
+    "lint",
+    "validate",
+    "test"
+  ],
   "config": {
     "commitizen": {
       "path": "./node_modules/cz-conventional-changelog"
@@ -71,5 +80,8 @@
     "env": [
       "mocha"
     ]
+  },
+  "dependencies": {
+    "@types/node": "^12.12.14"
   }
 }
