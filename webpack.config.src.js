@@ -7,11 +7,11 @@ module.exports = env => {
   const { ifProduction } = getIfUtils(env);
   const mode = ifProduction('production', 'development');
 
-  console.log(`>>> aergia-cli-ts Test Code Webpack Environment; [mode: ${env.mode}]`);
+  console.log(`>>> aergia-cli-ts Source Code Webpack Environment; [mode: ${env.mode}]`);
 
   return {
     mode: mode,
-    entry: ['./tests/all-tests-entry.js'],
+    entry: ['./lib/index.ts'],
     target: 'node',
     externals: [nodeExternals()],
     module: {
@@ -21,17 +21,13 @@ module.exports = env => {
           use: [{
             loader: 'ts-loader',
             options: {
-              configFile: 'tsconfig.tests.json'
+              configFile: 'tsconfig.src.json'
             }
           }]
         },
         {
           test: /\.json$/,
           use: 'json-loader'
-        },
-        {
-          test: /\.xml$/i,
-          use: 'raw-loader'
         }
       ]
     },
@@ -49,9 +45,9 @@ module.exports = env => {
       ignored: /node_modules/
     },
     output: {
-      filename: 'aergia-cli-test-bundle.js',
-      sourceMapFilename: 'aergia-cli-test-bundle.js.map',
-      path: path.resolve(__dirname, 'dist'),
+      filename: 'aergia-cli-bundle.js',
+      sourceMapFilename: 'aergia-cli-bundle.js.map',
+      path: path.join(__dirname, 'dist'),
       libraryTarget: 'commonjs'
     },
     devtool: 'inline-source-map'
