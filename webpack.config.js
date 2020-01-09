@@ -9,7 +9,7 @@ module.exports = (env) => {
   } = getIfUtils(env);
 
   const mode = ifProduction('production', 'development');
-  console.log('>>> Aergia Webpack Environment mode: ' + env.mode);
+  console.log('>>> Aergia-cli Webpack Environment mode: ' + env.mode);
 
   return {
     mode: mode,
@@ -49,7 +49,7 @@ module.exports = (env) => {
     output: {
       libraryTarget: 'commonjs',
       path: path.join(__dirname, 'dist'),
-      filename: 'aergia-bundle.js'
+      filename: 'aergia-cli-bundle.js'
     }
   };
 };
