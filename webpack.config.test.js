@@ -30,8 +30,8 @@ module.exports = {
     ignored: /node_modules/
   },
   output: {
-    filename: 'aergia-test-bundle.js',
-    sourceMapFilename: 'aergia-test-bundle.js.map',
+    filename: 'aergia-cli-test-bundle.js',
+    sourceMapFilename: 'aergia-cli-test-bundle.js.map',
     path: path.resolve(__dirname, 'dist'),
     libraryTarget: 'commonjs'
   }

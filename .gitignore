@@ -62,3 +62,6 @@ typings/
 
 # webpack output folder
 dist/
+
+.DS_Store
+Thumbs.db

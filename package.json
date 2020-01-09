@@ -1,17 +1,17 @@
 {
-  "name": "aergia",
+  "name": "aergia-cli-ts",
   "version": "0.0.1",
   "description": "Lazy build of command line interface",
   "main": "index.js",
   "scripts": {
     "clean": "rimraf dist",
-    "t": "mocha ./dist/aergia-test-bundle.js",
+    "t": "mocha ./dist/aergia-cli-test-bundle.js",
     "test": "npm audit --skip-unused && npm run t",
     "build": "npm run build:d",
     "build:d": "webpack -d --env.mode development",
     "build:p": "webpack -p --env.mode production",
     "build:t": "webpack --config webpack.config.test.js",
-    "exec": "node ./dist/aergia-bundle.js",
+    "exec": "node ./dist/aergia-cli-bundle.js",
     "lint": "(npx semistandard --verbose | npx snazzy) && npx tslint -c tslint.json --project tsconfig.json --exclude './lib/**/*.d.ts' './lib/**/*.ts'",
     "fix": "npx semistandard --fix",
     "watch": "webpack --watch --env.mode development",
@@ -22,19 +22,19 @@
     "validate": "npm run lint && npm run build && npm run build:t && npm test",
     "cm": "npx git-cz",
     "rep": "nyc report --reporter=lcov --reporter text summary",
-    "cov": "nyc mocha ./dist/aergia-test-bundle.js"
+    "cov": "nyc mocha ./dist/aergia-cli-test-bundle.js"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/plastikfan/aergia.git"
+    "url": "git+https://github.com/plastikfan/aergia-cli-ts.git"
   },
   "keywords": [],
   "author": "plastikfan",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/plastikfan/aergia/issues"
+    "url": "https://github.com/plastikfan/aergia-cli-ts/issues"
   },
-  "homepage": "https://github.com/plastikfan/aergia#readme",
+  "homepage": "https://github.com/plastikfan/aergia-cli-ts#readme",
   "devDependencies": {
     "@commitlint/cli": "^8.3.3",
     "@commitlint/config-conventional": "^8.2.0",
