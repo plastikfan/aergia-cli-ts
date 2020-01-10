@@ -1,2 +1,4 @@
 
-console.log('dummy: [yargs]');
+export function dummy () {
+  console.log('dummy: [yargs]');
+}
