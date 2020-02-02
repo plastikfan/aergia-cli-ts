@@ -62,18 +62,17 @@ export class YargsBuilderImpl {
       const commandArguments = helpers.findDescendant(
         this.schema.labels.commandOptions, descendants, this.schema.labels.elements);
 
+      const configuredPositional: string = R.prop('positional')(adaptedCommand);
       const positionalDef = this.positionalDef(
-        instance, name, R.prop('positional')(adaptedCommand), commandArguments);
+        name, configuredPositional, commandArguments);
 
-      let positionalCommandDef = name;
-      if (R.has('positional')(adaptedCommand)) {
-        positionalCommandDef = positionalDef.positionalDef;
-        instance = positionalDef.y;
-      }
+      const positionalCommandDef = R.has('positional')(adaptedCommand)
+        ? positionalDef : name;
 
       result = instance.command(positionalCommandDef, description,
-        (yin: yargs.Argv): yargs.Argv => {
-          yin = this.handleOptions(yin, commandArguments, positionalDef.positionalDef);
+        (yin: yargs.Argv): yargs.Argv => { // builder
+          yin = this.handlePositional(yin, configuredPositional, commandArguments);
+          yin = this.handleOptions(yin, commandArguments, positionalDef);
           const validationGroups = helpers.findDescendant(
             this.schema.labels.validationGroups, descendants, this.schema.labels.elements);
           yin = this.handleValidationGroups(yin, validationGroups);
@@ -86,26 +85,23 @@ export class YargsBuilderImpl {
 
   /**
    * @method positionalDef
-   * @description Processes the positional directive on the command. The positional
-   * definition should not contain mandatory/optional indicators, rather, that is
-   * specified in the argument definition which this method picks up and applies
-   * accordingly.
+   * @description Creates the positional definition string, required to create
+   * the command. The positional definition should not contain mandatory/optional
+   * indicators, rather, that is specified in the argument definition which this method
+   * picks up and applies accordingly.
    *
    * @public
-   * @param {yargs.Argv} instance
    * @param {string} commandName
    * @param {string} positionalStr
    * @param {{ [key: string]: {}}} argumentsMap
-   * @returns {{ positionalDef: string, y: yargs.Argv }}
+   * @returns {string}
    * @memberof YargsBuilderImpl
    */
-  public positionalDef (instance: yargs.Argv,
-    commandName: string,
+  public positionalDef (commandName: string,
     positionalStr: string,
     argumentsMap: { [key: string]: {}})
-    : { positionalDef: string, y: yargs.Argv } {
+    : string {
 
-    let yin = instance;
     const positionalArguments = R.split(' ')(positionalStr);
     const def = R.reduce((acc: string, argument: string): string => {
       const argumentDef: any = argumentsMap[argument];
@@ -114,18 +110,45 @@ export class YargsBuilderImpl {
         const optional = R.defaultTo(false, R.prop('optional')(argumentDef));
         const result = optional ? `[${argument}] ` : `<${argument}> `;
 
-        yin = this.positional(instance, argument, argumentsMap[argument]);
-        return R.concat(acc, R.trim(result));
+        return R.concat(acc, result);
       } else {
         throw new Error(`Positional argument: "${argument} not correctly defined if at all"`);
       }
     }, '')(positionalArguments);
 
-    return {
-      positionalDef: `${commandName} ${def}`,
-      y: yin
-    };
+    return `${commandName} ${def.trim()}`;
   } // positionalDef
+
+  /**
+   * @method handlePositional
+   * @description Processes the positional directive on the command.
+   *
+   * @param {yargs.Argv} instance
+   * @param {string} positionalStr
+   * @param {{ [key: string]: {} }} argumentsMap
+   * @returns {yargs.Argv}
+   * @memberof YargsBuilderImpl
+   */
+  public handlePositional (instance: yargs.Argv,
+    positionalStr: string,
+    argumentsMap: { [key: string]: {} })
+    : yargs.Argv {
+
+    let yin = instance;
+    const positionalArguments = R.split(' ')(positionalStr);
+
+    yin = R.reduce((acc: yargs.Argv, argument: string): yargs.Argv => {
+      const argumentDef: any = argumentsMap[argument];
+
+      if (argumentDef instanceof Object) {
+        return this.positional(acc, argument, argumentsMap[argument]);
+      } else {
+        throw new Error(`Positional argument: "${argument} not correctly defined if at all"`);
+      }
+    }, yin)(positionalArguments);
+
+    return yin;
+  } // handlePositional
 
   /**
    * @method positional
@@ -141,12 +164,13 @@ export class YargsBuilderImpl {
    */
   public positional (instance: yargs.Argv, argumentName: string, commandArgumentsObj: any)
   : yargs.Argv {
+    const IS_POSITIONAL = true;
     let result = instance;
     if (R.has(argumentName)(commandArgumentsObj)) {
       const def: yargs.PositionalOptions = R.prop(argumentName)(commandArgumentsObj);
 
       result = (this.handler)
-        ? this.handler(instance, argumentName, def, defaultOptionHandler, true)
+        ? this.handler(instance, argumentName, def, defaultOptionHandler, IS_POSITIONAL)
         : instance.positional(argumentName, def);
     }
     return result;
@@ -165,6 +189,7 @@ export class YargsBuilderImpl {
    */
   public handleOptions (instance: yargs.Argv, commandArgumentsObj: any, positionalDef: string)
   : yargs.Argv {
+    const NON_POSITIONAL = false;
     let result = instance;
 
     if (commandArgumentsObj instanceof Object) {
@@ -183,7 +208,7 @@ export class YargsBuilderImpl {
             let argumentDef: { [key: string]: any } = pair[1];
 
             // @ts-ignore: Object is possibly 'null'.
-            return this.handler(acc, argumentName, argumentDef, defaultOptionHandler, false);
+            return this.handler(acc, argumentName, argumentDef, defaultOptionHandler, NON_POSITIONAL);
           }, instance)(R.toPairs(nonPositional))
           : instance.options(nonPositional);
       }
