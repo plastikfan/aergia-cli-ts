@@ -7,6 +7,10 @@ export function dummy () {
   console.log('dummy: [yargs]');
 }
 
+function defaultFailHandler (msg: string, err: Error, yin: yargs.Argv, ac: any)
+  : yargs.Argv {
+  return yin;
+}
 export class YargsBuilder {
 
   constructor (private instance: yargs.Argv,
@@ -14,14 +18,10 @@ export class YargsBuilder {
     private handler: types.IAeYargsOptionHandler | null,
     private adapter: types.IYargsAdapter = new YargsAdapter(schema),
     private impl: YargsBuilderImpl = new YargsBuilderImpl(handler, schema),
-    private fail: (msg: string, err: Error, inst: yargs.Argv, ac: any) => yargs.Argv
-    ) {
-
-  }
+    private fail: (msg: string, err: Error, inst: yargs.Argv, ac: any) => yargs.Argv = defaultFailHandler) { }
 
   public buildCommand (command: any): yargs.Argv {
-
     const adaptedCommand = this.adapter.adapt(command);
     return this.impl.buildCommand(this.instance, adaptedCommand, this.fail);
   }
-}
+} // YargsBuilder

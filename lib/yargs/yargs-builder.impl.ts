@@ -1,3 +1,4 @@
+import { functify } from 'jinxed';
 import * as yargs from 'yargs';
 import * as R from 'ramda';
 import * as types from '../types';
