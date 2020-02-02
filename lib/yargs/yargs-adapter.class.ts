@@ -11,7 +11,7 @@ import * as helpers from '../utils/helpers';
  */
 export class YargsAdapter implements types.IYargsAdapter {
 
-  constructor (private exclusions: string[]) { }
+  constructor (private schema: types.IAeYargsSchema) { }
 
   /**
    * @method adapt
@@ -24,20 +24,21 @@ export class YargsAdapter implements types.IYargsAdapter {
    */
   public adapt (command: any): any {
     const adaptedCommand = R.clone(command);
-    const descendants: any = R.prop(types.labels.descendants)(adaptedCommand);
+    const descendants: any = R.prop(this.schema.labels.descendants)(adaptedCommand);
 
     if (descendants) {
-      const commandArgumentsObj = helpers.findDescendant(types.labels.commandOptions, descendants);
+      const commandArgumentsObj = helpers.findDescendant(
+        this.schema.labels.commandOptions, descendants, this.schema.labels.elements);
 
       if (commandArgumentsObj) {
         // Filter out exclusions from the command options
         //
-        const commandArguments = R.prop(types.labels.descendants)(commandArgumentsObj);
+        const commandArguments = R.prop(this.schema.labels.descendants)(commandArgumentsObj);
         const pickedArguments = R.pickBy((val: { [key: string]: any }, key: string): boolean => {
-          return !R.includes(key)(this.exclusions);
+          return !R.includes(key)(this.schema.exclusions);
         })(commandArguments);
 
-        R.set(R.lensProp(types.labels.descendants), pickedArguments)(commandArgumentsObj);
+        R.set(R.lensProp(this.schema.labels.descendants), pickedArguments)(commandArgumentsObj);
       }
     }
 

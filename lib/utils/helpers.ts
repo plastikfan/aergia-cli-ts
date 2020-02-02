@@ -75,10 +75,10 @@ export function startsWithAny (strings: string[], valueStr: string)
  * @returns {*}
  * @memberof YargsBuilderImpl
  */
-export function findDescendant (descendant: string, descendants: any[])
+export function findDescendant (descendant: string, descendants: any[], elementLabel: string)
   : any {
   return R.find((el: any): boolean => {
-    return el[types.labels.elementLabel] === descendant;
+    return el[elementLabel] === descendant;
   })(descendants);
 } // findDescendant
 

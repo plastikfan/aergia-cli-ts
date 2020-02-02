@@ -19,7 +19,9 @@ function defaultOptionHandler (yin: yargs.Argv, optionName: string, optionDef: {
  */
 export class YargsBuilderImpl {
 
-  constructor (private handler: types.IAeYargsOptionHandler | null) { }
+  constructor (private handler: types.IAeYargsOptionHandler | null,
+    private schema: types.IAeYargsSchema) { }
+
   /**
    * @method buildCommand
    * @description
@@ -51,18 +53,13 @@ export class YargsBuilderImpl {
   public command (instance: yargs.Argv, adaptedCommand: any): yargs.Argv {
 
     let result = instance;
-    // A note about literal references: Any literal reference must be something that is
-    // defined on the cli api. It's ok below to refer to 'description' with a literal, because
-    // it's part of the yargs domain specific language. However, '_children' is not, actually
-    // that's part of an external DSL (Zenobia), so that should be passed in via a
-    // variable.
-    //
-    const name: string = R.prop(types.labels.commandName)(adaptedCommand);
+    const name: string = R.prop(this.schema.labels.commandName)(adaptedCommand);
     const description: string = R.prop('description')(adaptedCommand);
-    const descendants: any = R.prop(types.labels.descendants)(adaptedCommand);
+    const descendants: any = R.prop(this.schema.labels.descendants)(adaptedCommand);
 
     if (descendants instanceof Array) {
-      const commandArguments = helpers.findDescendant(types.labels.commandOptions, descendants);
+      const commandArguments = helpers.findDescendant(
+        this.schema.labels.commandOptions, descendants, this.schema.labels.elements);
 
       const positionalDef = this.positionalDef(
         instance, name, R.prop('positional')(adaptedCommand), commandArguments);
@@ -76,7 +73,8 @@ export class YargsBuilderImpl {
       result = instance.command(positionalCommandDef, description,
         (yin: yargs.Argv): yargs.Argv => {
           yin = this.handleOptions(yin, commandArguments, positionalDef.positionalDef);
-          const validationGroups = helpers.findDescendant(types.labels.validationGroups, descendants);
+          const validationGroups = helpers.findDescendant(
+            this.schema.labels.validationGroups, descendants, this.schema.labels.elements);
           yin = this.handleValidationGroups(yin, validationGroups);
 
           return yin;
@@ -169,7 +167,7 @@ export class YargsBuilderImpl {
     let result = instance;
 
     if (commandArgumentsObj instanceof Object) {
-      const argumentsDescendants: any = R.prop(types.labels.descendants)(commandArgumentsObj);
+      const argumentsDescendants: any = R.prop(this.schema.labels.descendants)(commandArgumentsObj);
 
       if ((argumentsDescendants instanceof Object) && !(argumentsDescendants instanceof Array)) {
 
@@ -208,14 +206,14 @@ export class YargsBuilderImpl {
     let result = instance;
 
     if (argumentGroupsObj instanceof Object) {
-      const groupsDescendants: any = R.prop(types.labels.descendants)(argumentGroupsObj);
+      const groupsDescendants: any = R.prop(this.schema.labels.descendants)(argumentGroupsObj);
 
       if (groupsDescendants instanceof Array) {
         result = R.reduce((validatorAcc: yargs.Argv, validator: { [key: string]: any }): yargs.Argv => {
 
-          const validatorDescendants: any = validator[types.labels.descendants];
+          const validatorDescendants: any = validator[this.schema.labels.descendants];
           if (validatorDescendants instanceof Array) {
-            const validatorType: string = validator[types.labels.elementLabel];
+            const validatorType: string = validator[this.schema.labels.elements];
 
             if (R.includes(validatorType)(['Conflicts', 'Implies'])) {
               const get = (argumentRef: { name: string }) => argumentRef.name;
