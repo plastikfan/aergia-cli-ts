@@ -1,6 +1,21 @@
 
 import * as R from 'ramda';
+import * as types from '../types';
 
+/**
+ * @method uniquePairs
+ * @description Returns the list containing all unique combination of pairs
+ * of the members of @sequence.
+ *
+ * @export
+ * @template T
+ * @param {T[]} sequence
+ * @param {*} [get=(v: T): any => v]
+ * @param {*} [equals=(first: any, second: any): boolean => {
+ *     return first === second;
+ *   }]
+ * @returns {Array<[any, any]>}
+ */
 export function uniquePairs<T> (sequence: T[],
   get = (v: T): any => v,
   equals = (first: any, second: any): boolean => {
@@ -29,6 +44,16 @@ export function uniquePairs<T> (sequence: T[],
   return unique;
 }
 
+/**
+ * @method startsWithAny
+ * @description If @valueStr begins with any of the strings in @strings then
+ * returns true otherwise false.
+ *
+ * @export
+ * @param {string[]} strings
+ * @param {string} valueStr
+ * @returns {boolean}
+ */
 export function startsWithAny (strings: string[], valueStr: string)
   : boolean {
   let result = false;
@@ -39,3 +64,41 @@ export function startsWithAny (strings: string[], valueStr: string)
 
   return result;
 }
+
+/**
+ * @method findDescendant
+ * @description
+ *
+ * @export
+ * @param {string} descendant
+ * @param {any[]} descendants
+ * @returns {*}
+ * @memberof YargsBuilderImpl
+ */
+export function findDescendant (descendant: string, descendants: any[])
+  : any {
+  return R.find((el: any): boolean => {
+    return el[types.labels.elementLabel] === descendant;
+  })(descendants);
+} // findDescendant
+
+/**
+ * @method pickArguments
+ * @description Picks either the positional or non-positional arguments
+ * from @commandArgumentsObj.
+ *
+ * @export
+ * @param {*} commandArgumentsObj
+ * @param {string} positionalDef
+ * @param {('positional' | 'nonpositional')} [positionalType='nonpositional']
+ * @returns {*}
+ */
+export function pickArguments (commandArgumentsObj: any, positionalDef: string,
+  positionalType: 'positional' | 'nonpositional' = 'nonpositional')
+  : any {
+  const pickedArguments = R.split(' ')(positionalDef);
+
+  return R.pickBy((val, key): boolean => positionalType === 'nonpositional'
+    ? !R.includes(key, pickedArguments) : R.includes(key, pickedArguments)
+  )(commandArgumentsObj);
+} // pickArguments

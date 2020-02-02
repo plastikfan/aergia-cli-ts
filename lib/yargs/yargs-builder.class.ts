@@ -10,8 +10,10 @@ export function dummy () {
 export class YargsBuilder {
 
   constructor (private instance: yargs.Argv,
-    private adapter: types.IYargsAdapter = new YargsAdapter(),
-    private impl: YargsBuilderImpl = new YargsBuilderImpl(),
+    private handler: types.IAeYargsOptionHandler | null,
+    private exclusions: string[] = [],
+    private adapter: types.IYargsAdapter = new YargsAdapter(exclusions),
+    private impl: YargsBuilderImpl = new YargsBuilderImpl(handler),
     private fail: (msg: string, err: Error, inst: yargs.Argv, ac: any) => yargs.Argv
     ) {
 

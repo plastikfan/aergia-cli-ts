@@ -4,6 +4,8 @@ import { expect, use } from 'chai';
 import dirtyChai = require('dirty-chai'); use(dirtyChai);
 import sinonChai = require('sinon-chai'); use(sinonChai);
 import { uniquePairs, startsWithAny } from '../../lib/utils/helpers';
+import * as R from 'ramda';
+
 import * as yargs from 'yargs';
 
 describe('reduceUniquePair', () => {

@@ -1,4 +1,6 @@
 
+import * as yargs from 'yargs';
+
 // Yargs stuff
 //
 export interface IYargsAdapter {
@@ -15,3 +17,10 @@ export const labels = {
   elementLabel: '_',
   validationGroups: 'ArgumentGroups'
 };
+
+export interface IAeYargsOptionHandler {
+  (yin: yargs.Argv, optionName: string, optionDef: { [key: string]: any },
+    defaultHandler: IAeYargsOptionHandler,
+    positional: boolean)
+  : yargs.Argv;
+}
