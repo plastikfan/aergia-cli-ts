@@ -2,7 +2,7 @@
 import { expect, use } from 'chai';
 import dirtyChai = require('dirty-chai');
 use(dirtyChai);
-import * as composer from '../../lib/yargs/yargs-composer';
+import * as composer from '../../lib/yargs/yargs-builder.class';
 import { index } from '../../lib/index';
 
 describe('yargs-composer', () => {
