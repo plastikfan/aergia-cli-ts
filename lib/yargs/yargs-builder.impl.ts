@@ -51,8 +51,8 @@ export class YargsBuilderImpl {
    * @returns {yargs.Argv}
    * @memberof YargsBuilderImpl
    */
-  public command (instance: yargs.Argv, adaptedCommand: any): yargs.Argv {
-
+  public command (instance: yargs.Argv, adaptedCommand: any)
+    : yargs.Argv {
     let result = instance;
     const name: string = R.prop(this.schema.labels.commandName)(adaptedCommand);
     const description: string = R.prop('description')(adaptedCommand);
@@ -101,6 +101,9 @@ export class YargsBuilderImpl {
     positionalStr: string,
     argumentsMap: { [key: string]: {}})
     : string {
+    if (!positionalStr || positionalStr === '') {
+      return '';
+    }
 
     const positionalArguments = R.split(' ')(positionalStr);
     const def = R.reduce((acc: string, argument: string): string => {
@@ -133,19 +136,21 @@ export class YargsBuilderImpl {
     positionalStr: string,
     argumentsMap: { [key: string]: {} })
     : yargs.Argv {
-
     let yin = instance;
-    const positionalArguments = R.split(' ')(positionalStr);
 
-    yin = R.reduce((acc: yargs.Argv, argument: string): yargs.Argv => {
-      const argumentDef: any = argumentsMap[argument];
+    if (positionalStr && positionalStr !== '') {
+      const positionalArguments = R.split(' ')(positionalStr);
 
-      if (argumentDef instanceof Object) {
-        return this.positional(acc, argument, argumentsMap[argument]);
-      } else {
-        throw new Error(`Positional argument: "${argument} not correctly defined if at all"`);
-      }
-    }, yin)(positionalArguments);
+      yin = R.reduce((acc: yargs.Argv, argument: string): yargs.Argv => {
+        const argumentDef: any = argumentsMap[argument];
+
+        if (argumentDef instanceof Object) {
+          return this.positional(acc, argument, argumentsMap[argument]);
+        } else {
+          throw new Error(`Positional argument: "${argument} not correctly defined if at all"`);
+        }
+      }, yin)(positionalArguments);
+    }
 
     return yin;
   } // handlePositional
@@ -166,6 +171,7 @@ export class YargsBuilderImpl {
   : yargs.Argv {
     const IS_POSITIONAL = true;
     let result = instance;
+
     if (R.has(argumentName)(commandArgumentsObj)) {
       const def: yargs.PositionalOptions = R.prop(argumentName)(commandArgumentsObj);
 
