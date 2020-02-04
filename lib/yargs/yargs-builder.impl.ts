@@ -4,9 +4,23 @@ import * as R from 'ramda';
 import * as types from '../types';
 import * as helpers from '../../lib/utils/helpers';
 
-function defaultOptionHandler (yin: yargs.Argv, optionName: string, optionDef: { [key: string]: any },
-  positional: boolean,
-  _: types.IAeYargsOptionHandler)
+export function defaultFailHandler (msg: string, err: Error, yin: yargs.Argv, ac: any)
+  : yargs.Argv {
+  return yin;
+}
+
+// function defaultOptionHandler (yin: yargs.Argv, optionName: string, optionDef: { [key: string]: any },
+//   positional: boolean,
+//   _: types.IAeYargsOptionHandler)
+//   : yargs.Argv {
+
+//   return positional
+//     ? yin.positional(optionName, optionDef)
+//     : yin.option(optionDef);
+// }
+
+export function defaultOptionHandler (yin: yargs.Argv, optionName: string, optionDef: { [key: string]: any },
+  positional: boolean)
   : yargs.Argv {
 
   return positional
@@ -21,7 +35,9 @@ function defaultOptionHandler (yin: yargs.Argv, optionName: string, optionDef: {
 export class YargsBuilderImpl {
 
   constructor (private handler: types.IAeYargsOptionHandler | null,
-    private schema: types.IAeYargsSchema) { }
+    private schema: types.IAeYargsSchema) {
+
+  }
 
   /**
    * @method buildCommand

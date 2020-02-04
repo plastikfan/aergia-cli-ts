@@ -82,6 +82,20 @@ export function findDescendant (descendant: string, descendants: any[], elementL
   })(descendants);
 } // findDescendant
 
+export function findDescendantWithIndex (descendant: string, descendants: any[], elementLabel: string)
+  : { descendant: any; index: number } {
+
+  return {
+    descendant: R.find((el: any): boolean => {
+      return el[elementLabel] === descendant;
+    })(descendants),
+
+    index: R.findIndex((el: any): boolean => {
+      return el[elementLabel] === descendant;
+    })(descendants)
+  };
+}
+
 /**
  * @method pickArguments
  * @description Picks either the positional or non-positional arguments

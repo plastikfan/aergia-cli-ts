@@ -1,4 +1,4 @@
-
+import { functify } from 'jinxed';
 import * as R from 'ramda';
 import * as types from '../types';
 import * as helpers from '../utils/helpers';
@@ -27,21 +27,44 @@ export class YargsAdapter implements types.IYargsAdapter {
     const descendants: any = R.prop(this.schema.labels.descendants)(adaptedCommand);
 
     if (descendants) {
-      const commandArgumentsObj = helpers.findDescendant(
+      const found = helpers.findDescendantWithIndex(
         this.schema.labels.commandOptions, descendants, this.schema.labels.elements);
+
+      let commandArgumentsObj = found.descendant;
 
       if (commandArgumentsObj) {
         // Filter out exclusions from the command options
         //
-        const commandArguments = R.prop(this.schema.labels.descendants)(commandArgumentsObj);
-        const pickedArguments = R.pickBy((val: { [key: string]: any }, key: string): boolean => {
-          return !R.includes(key)(this.schema.exclusions);
-        })(commandArguments);
+        const commandArguments: { [key: string]: any } = R.prop(
+          this.schema.labels.descendants)(commandArgumentsObj);
 
-        R.set(R.lensProp(this.schema.labels.descendants), pickedArguments)(commandArgumentsObj);
+        type OptionDefType = { [key: string]: any };
+        type OptionDefPair = [string, OptionDefType];
+        type OptionDefSequence = OptionDefPair[];
+
+        const commandArgumentsPairs: OptionDefSequence = R.map(
+          (pair: OptionDefPair): OptionDefPair => {
+            const optionName = pair[0];
+            const optionDef: OptionDefType = pair[1];
+
+            const pickedProperties: OptionDefType = R.pickBy(
+              (pickedDef: OptionDefType, key: string): boolean => {
+                return !R.includes(key)(this.schema.exclusions);
+              })(optionDef);
+
+            return [optionName, pickedProperties];
+          })(R.toPairs(commandArguments));
+
+        const pickedArguments = R.fromPairs(commandArgumentsPairs);
+        commandArgumentsObj = R.set(R.lensProp(
+          this.schema.labels.descendants), pickedArguments
+        )(commandArgumentsObj);
+
+        descendants[found.index] = commandArgumentsObj;
       }
     }
 
+    console.log(`>>> adaptedCommand: ${functify(adaptedCommand)}`);
     return adaptedCommand;
   }
 } // adapt
