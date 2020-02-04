@@ -5,8 +5,8 @@ import * as types from '../types';
 import * as helpers from '../../lib/utils/helpers';
 
 function defaultOptionHandler (yin: yargs.Argv, optionName: string, optionDef: { [key: string]: any },
-  _: types.IAeYargsOptionHandler,
-  positional: boolean)
+  positional: boolean,
+  _: types.IAeYargsOptionHandler)
   : yargs.Argv {
 
   return positional
@@ -56,7 +56,7 @@ export class YargsBuilderImpl {
 
     let result = instance;
     const commandName: string = R.prop(this.schema.labels.commandName)(adaptedCommand);
-    const description: string = R.prop('describe')(adaptedCommand);
+    const helpDescription: string = R.prop('describe')(adaptedCommand);
     const descendants: any = R.prop(this.schema.labels.descendants)(adaptedCommand);
 
     if (descendants instanceof Array) {
@@ -69,14 +69,8 @@ export class YargsBuilderImpl {
         ? this.decoratePositionalDef(commandName, positionalDef, argumentsDescendants)
         : commandName;
 
-      // console.log(`@@@ hasPositional: "${hasPositional}"`);
-      // console.log(`@@@ positionalDef: "${positionalDef}"`);
-      // console.log(`@@@ positionalCommandDef: "${commandDescription}"`);
-
-      result = instance.command(commandDescription, description,
+      result = instance.command(commandDescription, helpDescription,
         (yin: yargs.Argv): yargs.Argv => { // builder
-          console.log(`### building command: ${commandName} [${description}], args: ${functify(commandArgumentsObj)}`);
-
           if (positionalDef) {
             yin = this.handlePositional(yin, positionalDef, argumentsDescendants);
           }
@@ -121,23 +115,29 @@ export class YargsBuilderImpl {
     const def = R.reduce((acc: string, argument: string): string => {
       const argumentDef: any = argumentsMap[argument];
 
-      if (argumentDef instanceof Object) {
-        const optional = R.defaultTo(false, R.prop('demandOption')(argumentDef));
-        const result = optional ? `[${argument}] ` : `<${argument}> `;
+      if (argumentDef) {
+        if (argumentDef instanceof Object) {
+          const demanded = R.defaultTo(false, R.prop('demandOption')(argumentDef));
+          const result = demanded ? `<${argument}> ` : `[${argument}] `;
 
-        return R.concat(acc, result);
+          return R.concat(acc, result);
+        } else {
+          throw new Error(`Decorating; positional argument: "${argument}" not defined as an object.`);
+        }
       } else {
-        throw new Error(`Positional argument: "${argument} not correctly defined if at all"`);
+        throw new Error(`Decorating; positional argument: "${argument}" not found`);
       }
-    }, '')(positionalArguments.slice(1)); // ignore first token => command name
+    }, '')(positionalArguments);
 
-    const result = (`${commandName} ${def.trim()}`).trim();
-    return result;
+    return (`${commandName} ${def.trim()}`).trim();
   } // positionalDef
 
   /**
    * @method handlePositional
-   * @description Processes the positional directive on the command.
+   * @description Processes the positional directive on the command. By the time
+   * we get into this method, we already know that all positional arguments have
+   * been correctly defined, because the positional definition for the command has
+   * already been created.
    *
    * @param {yargs.Argv} instance
    * @param {string} positionalStr
@@ -151,20 +151,12 @@ export class YargsBuilderImpl {
     : yargs.Argv {
     let yin = instance;
 
-    console.log(`>>> handlePositional ${positionalStr}`);
-
     if (positionalStr && positionalStr !== '') {
-      console.log(`>>> argumentsMap: ${functify(argumentsMap)}`);
       const positionalArguments = (R.split(' ')(positionalStr));
 
       yin = R.reduce((acc: yargs.Argv, argument: string): yargs.Argv => {
-        const argumentDef: any = argumentsMap[argument]; // being called with decorated arg name
-
-        if (argumentDef instanceof Object) {
-          return this.positional(acc, argument, argumentsMap[argument]);
-        } else {
-          throw new Error(`Positional argument: "${argument} not correctly defined if at all"`);
-        }
+        const argumentDef: any = argumentsMap[argument];
+        return this.positional(acc, argument, argumentDef);
       }, yin)(positionalArguments);
     }
 
@@ -192,7 +184,7 @@ export class YargsBuilderImpl {
       const def: yargs.PositionalOptions = R.prop(argumentName)(commandArgumentsObj);
 
       result = (this.handler)
-        ? this.handler(instance, argumentName, def, defaultOptionHandler, IS_POSITIONAL)
+        ? this.handler(instance, argumentName, def, IS_POSITIONAL, defaultOptionHandler)
         : instance.positional(argumentName, def);
     }
     return result;
@@ -225,7 +217,10 @@ export class YargsBuilderImpl {
           const argumentName = pair[0];
           let argumentDef: { [key: string]: any } = pair[1];
 
-          return this.handler!(acc, argumentName, argumentDef, defaultOptionHandler, NON_POSITIONAL);
+          // Strange that we need to cast away "null" from the handler here, especially since
+          // this is not required in this.positional.
+          //
+          return this.handler!(acc, argumentName, argumentDef, NON_POSITIONAL, defaultOptionHandler);
         }, instance)(R.toPairs(nonPositional))
         : instance.options(nonPositional);
     }

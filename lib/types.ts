@@ -9,8 +9,8 @@ export interface IYargsAdapter {
 
 export interface IAeYargsOptionHandler {
   (yin: yargs.Argv, optionName: string, optionDef: { [key: string]: any },
-    defaultHandler: IAeYargsOptionHandler,
-    positional: boolean)
+    positional: boolean,
+    defaultHandler: IAeYargsOptionHandler)
   : yargs.Argv;
 }
 
