@@ -53,30 +53,43 @@ export class YargsBuilderImpl {
    */
   public command (instance: yargs.Argv, adaptedCommand: any)
     : yargs.Argv {
+
     let result = instance;
-    const name: string = R.prop(this.schema.labels.commandName)(adaptedCommand);
-    const description: string = R.prop('description')(adaptedCommand);
+    const commandName: string = R.prop(this.schema.labels.commandName)(adaptedCommand);
+    const description: string = R.prop('describe')(adaptedCommand);
     const descendants: any = R.prop(this.schema.labels.descendants)(adaptedCommand);
 
     if (descendants instanceof Array) {
-      const commandArguments = helpers.findDescendant(
+      const commandArgumentsObj = helpers.findDescendant(
         this.schema.labels.commandOptions, descendants, this.schema.labels.elements);
+      const argumentsDescendants: any = R.prop(this.schema.labels.descendants)(commandArgumentsObj);
 
-      const configuredPositional: string = R.prop('positional')(adaptedCommand);
-      const positionalDef = this.positionalDef(
-        name, configuredPositional, commandArguments);
+      const positionalDef: string = R.prop('positional')(adaptedCommand);
+      const commandDescription = positionalDef
+        ? this.decoratePositionalDef(commandName, positionalDef, argumentsDescendants)
+        : commandName;
 
-      const positionalCommandDef = R.has('positional')(adaptedCommand)
-        ? positionalDef : name;
+      // console.log(`@@@ hasPositional: "${hasPositional}"`);
+      // console.log(`@@@ positionalDef: "${positionalDef}"`);
+      // console.log(`@@@ positionalCommandDef: "${commandDescription}"`);
 
-      result = instance.command(positionalCommandDef, description,
+      result = instance.command(commandDescription, description,
         (yin: yargs.Argv): yargs.Argv => { // builder
-          yin = this.handlePositional(yin, configuredPositional, commandArguments);
-          yin = this.handleOptions(yin, commandArguments, positionalDef);
-          const validationGroups = helpers.findDescendant(
-            this.schema.labels.validationGroups, descendants, this.schema.labels.elements);
-          yin = this.handleValidationGroups(yin, validationGroups);
+          console.log(`### building command: ${commandName} [${description}], args: ${functify(commandArgumentsObj)}`);
 
+          if (positionalDef) {
+            yin = this.handlePositional(yin, positionalDef, argumentsDescendants);
+          }
+
+          yin = this.handleOptions(yin, positionalDef, argumentsDescendants);
+
+          const validationGroupsObj = helpers.findDescendant(
+            this.schema.labels.validationGroups, descendants, this.schema.labels.elements);
+
+          if (validationGroupsObj) {
+            const groupsDescendants: any = R.prop(this.schema.labels.descendants)(validationGroupsObj);
+            yin = this.handleValidationGroups(yin, groupsDescendants);
+          }
           return yin;
         });
     }
@@ -84,7 +97,7 @@ export class YargsBuilderImpl {
   } // command
 
   /**
-   * @method positionalDef
+   * @method decoratePositionalDef
    * @description Creates the positional definition string, required to create
    * the command. The positional definition should not contain mandatory/optional
    * indicators, rather, that is specified in the argument definition which this method
@@ -97,29 +110,29 @@ export class YargsBuilderImpl {
    * @returns {string}
    * @memberof YargsBuilderImpl
    */
-  public positionalDef (commandName: string,
+  public decoratePositionalDef (commandName: string,
     positionalStr: string,
     argumentsMap: { [key: string]: {}})
     : string {
     if (!positionalStr || positionalStr === '') {
       return '';
     }
-
     const positionalArguments = R.split(' ')(positionalStr);
     const def = R.reduce((acc: string, argument: string): string => {
       const argumentDef: any = argumentsMap[argument];
 
       if (argumentDef instanceof Object) {
-        const optional = R.defaultTo(false, R.prop('optional')(argumentDef));
+        const optional = R.defaultTo(false, R.prop('demandOption')(argumentDef));
         const result = optional ? `[${argument}] ` : `<${argument}> `;
 
         return R.concat(acc, result);
       } else {
         throw new Error(`Positional argument: "${argument} not correctly defined if at all"`);
       }
-    }, '')(positionalArguments);
+    }, '')(positionalArguments.slice(1)); // ignore first token => command name
 
-    return `${commandName} ${def.trim()}`;
+    const result = (`${commandName} ${def.trim()}`).trim();
+    return result;
   } // positionalDef
 
   /**
@@ -138,11 +151,14 @@ export class YargsBuilderImpl {
     : yargs.Argv {
     let yin = instance;
 
+    console.log(`>>> handlePositional ${positionalStr}`);
+
     if (positionalStr && positionalStr !== '') {
-      const positionalArguments = R.split(' ')(positionalStr);
+      console.log(`>>> argumentsMap: ${functify(argumentsMap)}`);
+      const positionalArguments = (R.split(' ')(positionalStr));
 
       yin = R.reduce((acc: yargs.Argv, argument: string): yargs.Argv => {
-        const argumentDef: any = argumentsMap[argument];
+        const argumentDef: any = argumentsMap[argument]; // being called with decorated arg name
 
         if (argumentDef instanceof Object) {
           return this.positional(acc, argument, argumentsMap[argument]);
@@ -188,36 +204,30 @@ export class YargsBuilderImpl {
    *
    * @public
    * @param {yargs.Argv} instance
-   * @param {*} commandArgumentsObj
+   * @param {*} argumentsMap
    * @param {string} positionalDef
    * @returns {yargs.Argv}
    * @memberof YargsBuilderImpl
    */
-  public handleOptions (instance: yargs.Argv, commandArgumentsObj: any, positionalDef: string)
+  public handleOptions (instance: yargs.Argv, positionalDef: string, argumentsMap: {})
   : yargs.Argv {
     const NON_POSITIONAL = false;
     let result = instance;
 
-    if (commandArgumentsObj instanceof Object) {
-      const argumentsDescendants: any = R.prop(this.schema.labels.descendants)(commandArgumentsObj);
+    if (!(argumentsMap instanceof Array)) {
+      // first need to remove the positional arguments as they have already been
+      // processed.
+      //
+      const nonPositional = helpers.pickArguments(argumentsMap, positionalDef ?? '');
 
-      if ((argumentsDescendants instanceof Object) && !(argumentsDescendants instanceof Array)) {
+      result = (this.handler)
+        ? R.reduce((acc: yargs.Argv, pair: [string, any]): yargs.Argv => {
+          const argumentName = pair[0];
+          let argumentDef: { [key: string]: any } = pair[1];
 
-        // first need to remove the positional arguments as they have already been
-        // processed.
-        //
-        const nonPositional = helpers.pickArguments(commandArgumentsObj, positionalDef);
-
-        result = (this.handler)
-          ? R.reduce((acc: yargs.Argv, pair: [string, any]): yargs.Argv => {
-            const argumentName = pair[0];
-            let argumentDef: { [key: string]: any } = pair[1];
-
-            // @ts-ignore: Object is possibly 'null'.
-            return this.handler(acc, argumentName, argumentDef, defaultOptionHandler, NON_POSITIONAL);
-          }, instance)(R.toPairs(nonPositional))
-          : instance.options(nonPositional);
-      }
+          return this.handler!(acc, argumentName, argumentDef, defaultOptionHandler, NON_POSITIONAL);
+        }, instance)(R.toPairs(nonPositional))
+        : instance.options(nonPositional);
     }
 
     return result;
@@ -229,47 +239,39 @@ export class YargsBuilderImpl {
    *
    * @public
    * @param {yargs.Argv} instance
-   * @param {*} argumentGroupsObj
+   * @param {*} validationGroups
    * @returns {yargs.Argv}
    * @memberof YargsBuilderImpl
    */
-  public handleValidationGroups (instance: yargs.Argv, argumentGroupsObj: any)
+  public handleValidationGroups (instance: yargs.Argv, validationGroups: any[])
     : yargs.Argv {
-    let result = instance;
+    const result = R.reduce((validatorAcc: yargs.Argv, validator: { [key: string]: any }): yargs.Argv => {
+      const validatorDescendants: any = validator[this.schema.labels.descendants];
+      if (validatorDescendants instanceof Array) {
+        const validatorType: string = validator[this.schema.labels.elements];
 
-    if (argumentGroupsObj instanceof Object) {
-      const groupsDescendants: any = R.prop(this.schema.labels.descendants)(argumentGroupsObj);
+        if (R.includes(validatorType)(['Conflicts', 'Implies'])) {
+          const get = (argumentRef: { name: string }) => argumentRef.name;
+          const equals = (argumentRefA: { name: string }, argumentRefB: { name: string }): boolean => {
+            return argumentRefA.name === argumentRefB.name;
+          };
+          const pairs = helpers.uniquePairs(validatorDescendants, get, equals);
 
-      if (groupsDescendants instanceof Array) {
-        result = R.reduce((validatorAcc: yargs.Argv, validator: { [key: string]: any }): yargs.Argv => {
+          validatorAcc = R.reduce((innerAcc: yargs.Argv, pair: any): yargs.Argv => {
+            switch (validatorType) {
+              case 'Conflicts':
+                return innerAcc.conflicts(pair[0], pair[1]);
 
-          const validatorDescendants: any = validator[this.schema.labels.descendants];
-          if (validatorDescendants instanceof Array) {
-            const validatorType: string = validator[this.schema.labels.elements];
-
-            if (R.includes(validatorType)(['Conflicts', 'Implies'])) {
-              const get = (argumentRef: { name: string }) => argumentRef.name;
-              const equals = (argumentRefA: { name: string }, argumentRefB: { name: string }): boolean => {
-                return argumentRefA.name === argumentRefB.name;
-              };
-              const pairs = helpers.uniquePairs(validatorDescendants, get, equals);
-
-              validatorAcc = R.reduce((innerAcc: yargs.Argv, pair: any): yargs.Argv => {
-                switch (validatorType) {
-                  case 'Conflicts':
-                    return innerAcc.conflicts(pair[0], pair[1]);
-
-                  case 'Implies':
-                    return innerAcc.implies(pair[0], pair[1]);
-                }
-                return innerAcc;
-              }, instance)(pairs);
+              case 'Implies':
+                return innerAcc.implies(pair[0], pair[1]);
             }
-          }
-          return validatorAcc;
-        }, instance)(groupsDescendants);
+            return innerAcc;
+          }, instance)(pairs);
+        }
       }
-    }
+      return validatorAcc;
+    }, instance)(validationGroups);
+
     return result;
   } // handleValidationGroups
 } // YargsBuilderImpl
