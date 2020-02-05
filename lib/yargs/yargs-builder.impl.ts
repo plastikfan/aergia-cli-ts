@@ -177,22 +177,17 @@ export class YargsBuilderImpl {
    * @public
    * @param {yargs.Argv} instance
    * @param {string} argumentName
-   * @param {*} commandArgumentsObj
+   * @param {*} argumentDef
    * @returns {yargs.Argv}
    * @memberof YargsBuilderImpl
    */
-  public positional (instance: yargs.Argv, argumentName: string, commandArgumentsObj: any)
+  public positional (instance: yargs.Argv, argumentName: string, argumentDef: any)
   : yargs.Argv {
     const IS_POSITIONAL = true;
-    let result = instance;
+    const result = (this.handler)
+      ? this.handler(instance, argumentName, argumentDef, IS_POSITIONAL, defaultOptionHandler)
+      : instance.positional(argumentName, argumentDef);
 
-    if (R.has(argumentName)(commandArgumentsObj)) {
-      const def: yargs.PositionalOptions = R.prop(argumentName)(commandArgumentsObj);
-
-      result = (this.handler)
-        ? this.handler(instance, argumentName, def, IS_POSITIONAL, defaultOptionHandler)
-        : instance.positional(argumentName, def);
-    }
     return result;
   } // positional
 
@@ -207,29 +202,27 @@ export class YargsBuilderImpl {
    * @returns {yargs.Argv}
    * @memberof YargsBuilderImpl
    */
-  public handleOptions (instance: yargs.Argv, positionalDef: string, argumentsMap: {})
+  public handleOptions (instance: yargs.Argv, positionalDef: string, argumentsMap: { [key: string]: any })
   : yargs.Argv {
     const NON_POSITIONAL = false;
     let result = instance;
 
-    if (!(argumentsMap instanceof Array)) {
-      // first need to remove the positional arguments as they have already been
-      // processed.
-      //
-      const nonPositional = helpers.pickArguments(argumentsMap, positionalDef ?? '');
+    // first need to remove the positional arguments as they have already been
+    // processed.
+    //
+    const nonPositional = helpers.pickArguments(argumentsMap, positionalDef ?? '');
 
-      result = (this.handler)
-        ? R.reduce((acc: yargs.Argv, pair: [string, any]): yargs.Argv => {
-          const argumentName = pair[0];
-          let argumentDef: { [key: string]: any } = pair[1];
+    result = (this.handler)
+      ? R.reduce((acc: yargs.Argv, pair: [string, any]): yargs.Argv => {
+        const argumentName = pair[0];
+        let argumentDef: { [key: string]: any } = pair[1];
 
-          // Strange that we need to cast away "null" from the handler here, especially since
-          // this is not required in this.positional.
-          //
-          return this.handler!(acc, argumentName, argumentDef, NON_POSITIONAL, defaultOptionHandler);
-        }, instance)(R.toPairs(nonPositional))
-        : instance.options(nonPositional);
-    }
+        // Strange that we need to cast away "null" from the handler here, especially since
+        // this is not required in this.positional.
+        //
+        return this.handler!(acc, argumentName, argumentDef, NON_POSITIONAL, defaultOptionHandler);
+      }, instance)(R.toPairs(nonPositional))
+      : instance.options(nonPositional);
 
     return result;
   } // handleArguments
@@ -244,31 +237,29 @@ export class YargsBuilderImpl {
    * @returns {yargs.Argv}
    * @memberof YargsBuilderImpl
    */
-  public handleValidationGroups (instance: yargs.Argv, validationGroups: any[])
+  public handleValidationGroups (instance: yargs.Argv, validationGroups: { [key: string]: any }[])
     : yargs.Argv {
     const result = R.reduce((validatorAcc: yargs.Argv, validator: { [key: string]: any }): yargs.Argv => {
       const validatorDescendants: any = validator[this.schema.labels.descendants];
-      if (validatorDescendants instanceof Array) {
-        const validatorType: string = validator[this.schema.labels.elements];
+      const validatorType: string = validator[this.schema.labels.elements];
 
-        if (R.includes(validatorType)(['Conflicts', 'Implies'])) {
-          const get = (argumentRef: { name: string }) => argumentRef.name;
-          const equals = (argumentRefA: { name: string }, argumentRefB: { name: string }): boolean => {
-            return argumentRefA.name === argumentRefB.name;
-          };
-          const pairs = helpers.uniquePairs(validatorDescendants, get, equals);
+      if (R.includes(validatorType)(['Conflicts', 'Implies'])) {
+        const get = (argumentRef: { name: string }) => argumentRef.name;
+        const equals = (argumentRefA: { name: string }, argumentRefB: { name: string }): boolean => {
+          return argumentRefA.name === argumentRefB.name;
+        };
+        const pairs = helpers.uniquePairs(validatorDescendants, get, equals);
 
-          validatorAcc = R.reduce((innerAcc: yargs.Argv, pair: any): yargs.Argv => {
-            switch (validatorType) {
-              case 'Conflicts':
-                return innerAcc.conflicts(pair[0], pair[1]);
+        validatorAcc = R.reduce((innerAcc: yargs.Argv, pair: any): yargs.Argv => {
+          switch (validatorType) {
+            case 'Conflicts':
+              return innerAcc.conflicts(pair[0], pair[1]);
 
-              case 'Implies':
-                return innerAcc.implies(pair[0], pair[1]);
-            }
-            return innerAcc;
-          }, instance)(pairs);
-        }
+            case 'Implies':
+              return innerAcc.implies(pair[0], pair[1]);
+          }
+          return innerAcc;
+        }, instance)(pairs);
       }
       return validatorAcc;
     }, instance)(validationGroups);

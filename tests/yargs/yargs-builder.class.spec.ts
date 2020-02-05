@@ -1,3 +1,4 @@
+import { functify } from 'jinxed';
 
 import { use, expect } from 'chai';
 import dirtyChai = require('dirty-chai');
@@ -98,6 +99,39 @@ describe('yargs-composer', () => {
 
       expect(result.o).to.equal('$(whoami)');
       expect(result.owner).to.equal('$(whoami)');
+    });
+  });
+
+  context('go', () => {
+    context('given: a correctly defined command', () => {
+      it('should: return the parsed command line', () => {
+        const handler = null;
+        const builder: build.YargsBuilder = new build.YargsBuilder(
+          instance,
+          aeSchema,
+          handler
+        );
+
+        const command = {
+          name: 'copy',
+          describe: 'Copy file',
+          _children: [
+            {
+              _: 'Arguments',
+              _children: {
+                from: {
+                  name: 'from',
+                  describe: 'source file location',
+                  _: 'Argument'
+                }
+              }
+            }
+          ]
+        };
+        const yin = builder.buildCommand(command);
+        const result = builder.go(yin);
+        expect(result).to.not.be.undefined();
+      });
     });
   });
 });

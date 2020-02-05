@@ -1,11 +1,7 @@
 import * as yargs from 'yargs';
 import * as types from '../types';
 import { YargsAdapter } from './yargs-adapter.class';
-import { YargsBuilderImpl, defaultFailHandler, defaultOptionHandler } from './yargs-builder.impl';
-
-export function dummy () {
-  console.log('dummy: [yargs]');
-}
+import { YargsBuilderImpl, defaultFailHandler } from './yargs-builder.impl';
 
 export class YargsBuilder {
 
@@ -19,5 +15,10 @@ export class YargsBuilder {
   public buildCommand (command: any): yargs.Argv {
     const adaptedCommand = this.adapter.adapt(command);
     return this.impl.buildCommand(this.instance, adaptedCommand, this.fail);
+  }
+
+  public go (instance: yargs.Argv)
+  : {} {
+    return instance.argv;
   }
 } // YargsBuilder
