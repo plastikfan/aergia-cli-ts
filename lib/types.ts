@@ -36,7 +36,7 @@ export interface IAeYargsOptionCallback {
 
 export interface IAeYargsSchema {
   labels: {
-    commandName: string,
+    commandNameId: string,
     commandOptions: string
     descendants: string,
     elements: string,

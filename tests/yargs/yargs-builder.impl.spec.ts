@@ -10,7 +10,7 @@ import { YargsBuilderImpl } from '../../lib/yargs/yargs-builder.impl';
 
 const aeSchema: types.IAeYargsSchema = {
   labels: {
-    commandName: 'name',
+    commandNameId: 'name',
     commandOptions: 'Arguments',
     descendants: '_children',
     elements: '_',
@@ -545,6 +545,20 @@ describe('YargsBuilderImpl', () => {
       });
     });
 
+    context('given: mandatory positional argument', () => {
+      it('should: correctly decorated positional string', () => {
+        const argumentsMap = {
+          to: {
+            describe: 'destination file location',
+            demandOption: true
+          }
+        };
+
+        const result = builderImpl.decoratePositionalDef('copy', 'to', argumentsMap);
+        expect(result).to.equal('copy <to>');
+      });
+    });
+
     context('given: an argument definition that is not an object', () => {
       it('should: return empty string', () => {
         const argumentsMap = {
@@ -556,7 +570,19 @@ describe('YargsBuilderImpl', () => {
 
         expect(() => {
           builderImpl.decoratePositionalDef('copy', 'from to', argumentsMap);
-        });
+        }).to.throw();
+      });
+    });
+
+    context('given: an positional argument definition that is not an object', () => {
+      it('should: return empty string', () => {
+        const argumentsMap = {
+          to: 'destination file location'
+        };
+
+        expect(() => {
+          builderImpl.decoratePositionalDef('copy', 'to', argumentsMap);
+        }).to.throw();
       });
     });
   }); // decoratePositionalDef
@@ -574,7 +600,48 @@ describe('YargsBuilderImpl', () => {
       });
     });
   }); // handlePositional
-}); // decoratePositionalDef
+
+  context('handleValidationGroups', () => {
+    context('given: validator group type which is neither "conflicts" or "implies"', () => {
+      it('should: do nothing', () => {
+        const groups = [{
+          _: 'ArgumentGroups',
+          _children: [
+            {
+              _: 'BadValidator',
+              _children: [
+                { name: 'log', _: 'ArgumentRef' },
+                { name: 'print', _: 'ArgumentRef' }
+              ]
+            }
+          ]
+        }];
+        builderImpl.handleValidationGroups(instance, groups);
+      });
+    });
+
+    context('given: validator group with multiple items in same "conflicts" group"', () => {
+      it('should: just do it!', () => {
+        const groups = [{
+          _: 'ArgumentGroups',
+          _children: [
+            {
+              _: 'Conflicts',
+              _children: [
+                { name: 'log', _: 'ArgumentRef' },
+                { name: 'print', _: 'ArgumentRef' },
+                { name: 'tail', _: 'ArgumentRef' },
+                { name: 'tap', _: 'ArgumentRef' }
+              ]
+            }
+          ]
+        }];
+        builderImpl.handleValidationGroups(instance, groups);
+      });
+    });
+  }); // handleValidationGroups
+
+}); // YargsBuilderImpl
 
 describe('universal option/argument check', () => {
   let instance: yargs.Argv;

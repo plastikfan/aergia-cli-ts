@@ -61,38 +61,37 @@ export class YargsBuilderImpl {
     : yargs.Argv {
 
     let result = instance;
-    const commandName: string = R.prop(this.schema.labels.commandName)(adaptedCommand);
+    const commandName: string = R.prop(this.schema.labels.commandNameId)(adaptedCommand);
     const helpDescription: string = R.prop('describe')(adaptedCommand);
-    const descendants: any = R.prop(this.schema.labels.descendants)(adaptedCommand);
+    const descendants: any[] = R.prop(this.schema.labels.descendants)(adaptedCommand);
 
-    if (descendants instanceof Array) {
-      const commandArgumentsObj = helpers.findDescendant(
-        this.schema.labels.commandOptions, descendants, this.schema.labels.elements);
-      const argumentsDescendants: any = R.prop(this.schema.labels.descendants)(commandArgumentsObj);
+    const commandArgumentsObj = helpers.findDescendant(
+      this.schema.labels.commandOptions, descendants, this.schema.labels.elements);
+    const argumentsDescendants: any = R.prop(this.schema.labels.descendants)(commandArgumentsObj);
 
-      const positionalDef: string = R.prop('positional')(adaptedCommand);
-      const commandDescription = positionalDef
-        ? this.decoratePositionalDef(commandName, positionalDef, argumentsDescendants)
-        : commandName;
+    const positionalDef: string = R.prop('positional')(adaptedCommand);
+    const commandDescription = positionalDef
+      ? this.decoratePositionalDef(commandName, positionalDef, argumentsDescendants)
+      : commandName;
 
-      result = instance.command(commandDescription, helpDescription,
-        (yin: yargs.Argv): yargs.Argv => { // builder
-          if (positionalDef) {
-            yin = this.handlePositional(yin, positionalDef, argumentsDescendants);
-          }
+    result = instance.command(commandDescription, helpDescription,
+      (yin: yargs.Argv): yargs.Argv => { // builder
+        if (positionalDef) {
+          yin = this.handlePositional(yin, positionalDef, argumentsDescendants);
+        }
 
-          yin = this.handleOptions(yin, positionalDef, argumentsDescendants);
+        yin = this.handleOptions(yin, positionalDef, argumentsDescendants);
 
-          const validationGroupsObj = helpers.findDescendant(
-            this.schema.labels.validationGroups, descendants, this.schema.labels.elements);
+        const validationGroupsObj = helpers.findDescendant(
+          this.schema.labels.validationGroups, descendants, this.schema.labels.elements);
 
-          if (validationGroupsObj) {
-            const groupsDescendants: any = R.prop(this.schema.labels.descendants)(validationGroupsObj);
-            yin = this.handleValidationGroups(yin, groupsDescendants);
-          }
-          return yin;
-        });
-    }
+        if (validationGroupsObj) {
+          const groupsDescendants: any = R.prop(this.schema.labels.descendants)(validationGroupsObj);
+          yin = this.handleValidationGroups(yin, groupsDescendants);
+        }
+        return yin;
+      });
+
     return result;
   } // command
 
@@ -244,19 +243,23 @@ export class YargsBuilderImpl {
       const validatorType: string = validator[this.schema.labels.elements];
 
       if (R.includes(validatorType)(['Conflicts', 'Implies'])) {
-        const get = (argumentRef: { name: string }) => argumentRef.name;
-        const equals = (argumentRefA: { name: string }, argumentRefB: { name: string }): boolean => {
-          return argumentRefA.name === argumentRefB.name;
+        const get = (argumentRef: { [key: string]: any }) => argumentRef[this.schema.labels.commandNameId];
+        /* istanbul ignore next: wtf? */
+        const equals = (a: { [key: string]: any }, b: { [key: string]: any }): boolean => {
+          /* istanbul ignore next: wtf? */
+          return a[this.schema.labels.commandNameId] === b[this.schema.labels.commandNameId];
         };
+
         const pairs = helpers.uniquePairs(validatorDescendants, get, equals);
 
         validatorAcc = R.reduce((innerAcc: yargs.Argv, pair: any): yargs.Argv => {
           switch (validatorType) {
             case 'Conflicts':
-              return innerAcc.conflicts(pair[0], pair[1]);
-
+              innerAcc.conflicts(pair[0], pair[1]);
+              break;
             case 'Implies':
-              return innerAcc.implies(pair[0], pair[1]);
+              innerAcc.implies(pair[0], pair[1]);
+              break;
           }
           return innerAcc;
         }, instance)(pairs);
