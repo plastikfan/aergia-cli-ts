@@ -7,22 +7,29 @@ export interface IYargsAdapter {
   adapt (command: any): any;
 }
 
-export interface IAeYargsOptionHandler {
-  (yin: yargs.Argv, optionName: string, optionDef: { [key: string]: any },
-    positional: boolean,
-    defaultHandler?: IAeYargsOptionHandler)
-  : yargs.Argv;
-}
-
-export interface IDefaultAeYargsOptionHandler { // Client passes this into ctor
+/**
+ *
+ *
+ * @export
+ * @interface IDefaultAeYargsOptionHandler
+ */
+export interface IDefaultAeYargsOptionHandler {
   (yin: yargs.Argv, optionName: string, optionDef: { [key: string]: any },
     positional: boolean,
     callback: IAeYargsOptionCallback)
     : yargs.Argv;
 }
 
-export interface IAeYargsOptionCallback { // Client passes this to YB
-  (yin: yargs.Argv, optionName: string, optionDef: { [key: string]: any },
+/**
+ *
+ *
+ * @export
+ * @interface IAeYargsOptionCallback
+ */
+export interface IAeYargsOptionCallback {
+  (yin: yargs.Argv,
+    optionName: string,
+    optionDef: { [key: string]: any },
     positional: boolean)
     : yargs.Argv;
 }

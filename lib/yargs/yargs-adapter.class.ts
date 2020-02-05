@@ -27,7 +27,7 @@ export class YargsAdapter implements types.IYargsAdapter {
     const descendants: any = R.prop(this.schema.labels.descendants)(adaptedCommand);
 
     if (descendants) {
-      const found = helpers.findDescendantWithIndex(
+      const found: { descendant: any; index: number } = helpers.findDescendantWithIndex(
         this.schema.labels.commandOptions, descendants, this.schema.labels.elements);
 
       let commandArgumentsObj = found.descendant;
@@ -64,7 +64,6 @@ export class YargsAdapter implements types.IYargsAdapter {
       }
     }
 
-    console.log(`>>> adaptedCommand: ${functify(adaptedCommand)}`);
     return adaptedCommand;
   }
 } // adapt

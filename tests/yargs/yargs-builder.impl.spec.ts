@@ -56,7 +56,7 @@ describe('YargsBuilderImpl without custom option handler', () => {
                 _children: {
                   to: {
                     alias: 't',
-                    describe: 'destination file location',
+                    describe: 'destination file location'
                   }
                 }
               }
@@ -369,15 +369,15 @@ describe('YargsBuilderImpl without custom option handler', () => {
           const result = yin.parse(['copy', '~/source/front.jpg',
             '~/destination/front.jpg', '--log', '~/logs/fs.log', '-o', '$(whoami)']);
 
-          // expect(result.from).to.equal('~/source/front.jpg');
+          expect(result.from).to.equal('~/source/front.jpg');
 
-          // expect(result.to).to.equal('~/destination/front.jpg');
+          expect(result.to).to.equal('~/destination/front.jpg');
 
-          // expect(result.l).to.equal('~/logs/fs.log');
-          // expect(result.log).to.equal('~/logs/fs.log');
+          expect(result.l).to.equal('~/logs/fs.log');
+          expect(result.log).to.equal('~/logs/fs.log');
 
-          // expect(result.o).to.equal('$(whoami)');
-          // expect(result.owner).to.equal('$(whoami)');
+          expect(result.o).to.equal('$(whoami)');
+          expect(result.owner).to.equal('$(whoami)');
         });
       });
     });
@@ -386,17 +386,7 @@ describe('YargsBuilderImpl without custom option handler', () => {
   // define a positional argument, with a field only allowed for options
 }); // YargsBuilderImpl without custom option handler
 
-// function defaultOptionHandler (yin: yargs.Argv, optionName: string, optionDef: { [key: string]: any },
-//   positional: boolean,
-//   _: types.IAeYargsOptionHandler)
-//   : yargs.Argv {
-
-//   return positional
-//     ? yin.positional(optionName, optionDef)
-//     : yin.option(optionDef);
-// }
-
-describe.skip('YargsBuilderImpl WITH custom option handler', () => {
+describe('YargsBuilderImpl WITH custom option handler', () => {
   let instance: yargs.Argv;
 
   beforeEach(() => {
@@ -404,14 +394,16 @@ describe.skip('YargsBuilderImpl WITH custom option handler', () => {
   });
 
   context('Arguments only', () => {
-    context('!!!! Without any positional arguments', () => {
+    context('Without any positional arguments', () => {
       context('given: a command with multiple options', () => {
         it('should: build command with multiple parsed options', () => {
-          const handler: types.IAeYargsOptionHandler = (yin: yargs.Argv,
-            optionName: string, optionDef: { [key: string]: any },
+          const handler: types.IDefaultAeYargsOptionHandler = (yin: yargs.Argv,
+            optionName: string,
+            optionDef: { [key: string]: any },
             positional: boolean,
-            def: types.IAeYargsOptionHandler): yargs.Argv => {
-            return def(yin, optionName, optionDef, positional, def);
+            def: types.IAeYargsOptionCallback): yargs.Argv => {
+
+            return def(yin, optionName, optionDef, positional);
           };
           const builderImpl: YargsBuilderImpl = new YargsBuilderImpl(handler, aeSchema);
 
@@ -465,38 +457,3 @@ describe('YargsBuilderImpl.decoratePositionalDef', () => {
     //
   });
 }); // decoratePositionalDef
-
-// ===================================================================================================
-
-function defaultOptionHandler (yin: yargs.Argv, optionName: string, optionDef: { [key: string]: any },
-  positional: boolean)
-  : yargs.Argv {
-
-  return positional
-    ? yin.positional(optionName, optionDef)
-    : yin.option(optionDef);
-}
-class Host {
-  constructor (private handler: types.IDefaultAeYargsOptionHandler = defaultOptionHandler) { }
-  readonly yin: yargs.Argv = require('yargs');
-
-  invoke () {
-    if (this.handler) {
-      const optionDef = {};
-      const positional = true;
-      this.handler(this.yin, 'OPTION-NAME', optionDef, positional, defaultOptionHandler);
-    }
-  }
-}
-
-describe('DEFINE OPTION HANDLER', () => {
-  it('give callback to HOST', () => {
-    // THIS IS CLIENT SIDE
-    //
-    const host = new Host((yin: yargs.Argv, optionName: string, optionDef: { [key: string]: any },
-      positional: boolean,
-      callback: types.IAeYargsOptionCallback): yargs.Argv => {
-      return callback(yin, optionName, optionDef, positional);
-    });
-  });
-});

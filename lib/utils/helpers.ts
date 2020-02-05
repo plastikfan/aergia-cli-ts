@@ -85,14 +85,13 @@ export function findDescendant (descendant: string, descendants: any[], elementL
 export function findDescendantWithIndex (descendant: string, descendants: any[], elementLabel: string)
   : { descendant: any; index: number } {
 
-  return {
-    descendant: R.find((el: any): boolean => {
-      return el[elementLabel] === descendant;
-    })(descendants),
+  const fn = (el: any): boolean => {
+    return el[elementLabel] === descendant;
+  };
 
-    index: R.findIndex((el: any): boolean => {
-      return el[elementLabel] === descendant;
-    })(descendants)
+  return {
+    descendant: R.find(fn)(descendants),
+    index: R.findIndex(fn)(descendants)
   };
 }
 

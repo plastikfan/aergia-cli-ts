@@ -24,18 +24,18 @@ describe('yargs-composer', () => {
     instance = require('yargs');
   });
 
-  context('given: ...', () => {
-    it.skip('should: ', () => {
+  context('given: command with positional and non positional options', () => {
+    it('should: build command', () => {
+      const handler = (yin: yargs.Argv, optionName: string, optionDef: { [key: string]: any },
+        positional: boolean,
+        callback: types.IAeYargsOptionCallback): yargs.Argv => {
+        return callback(yin, optionName, optionDef, positional);
+      };
+
       const builder: build.YargsBuilder = new build.YargsBuilder(
         instance,
         aeSchema,
-        (
-          (yin: yargs.Argv, optionName: string, optionDef: { [key: string]: any },
-          positional: boolean,
-          callback: types.IAeYargsOptionCallback): yargs.Argv => {
-            return callback(yin, optionName, optionDef, positional);
-          }
-        )
+        handler
       );
 
       const command = {

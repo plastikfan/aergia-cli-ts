@@ -9,23 +9,13 @@ export function defaultFailHandler (msg: string, err: Error, yin: yargs.Argv, ac
   return yin;
 }
 
-// function defaultOptionHandler (yin: yargs.Argv, optionName: string, optionDef: { [key: string]: any },
-//   positional: boolean,
-//   _: types.IAeYargsOptionHandler)
-//   : yargs.Argv {
-
-//   return positional
-//     ? yin.positional(optionName, optionDef)
-//     : yin.option(optionDef);
-// }
-
 export function defaultOptionHandler (yin: yargs.Argv, optionName: string, optionDef: { [key: string]: any },
   positional: boolean)
   : yargs.Argv {
 
   return positional
     ? yin.positional(optionName, optionDef)
-    : yin.option(optionDef);
+    : yin.option(optionName, optionDef);
 }
 
 /**
@@ -34,7 +24,7 @@ export function defaultOptionHandler (yin: yargs.Argv, optionName: string, optio
  */
 export class YargsBuilderImpl {
 
-  constructor (private handler: types.IAeYargsOptionHandler | null,
+  constructor (private handler: types.IDefaultAeYargsOptionHandler | null,
     private schema: types.IAeYargsSchema) {
 
   }
