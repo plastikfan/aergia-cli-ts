@@ -15,7 +15,9 @@ const aeSchema: types.IAeYargsSchema = {
     elements: '_',
     validationGroups: 'ArgumentGroups'
   },
-  exclusions: ['name', '_']
+  exclusions: {
+    options: ['name', '_']
+  }
 };
 
 describe('YargsAdapter', () => {

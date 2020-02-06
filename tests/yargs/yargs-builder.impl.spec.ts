@@ -16,7 +16,9 @@ const aeSchema: types.IAeYargsSchema = {
     elements: '_',
     validationGroups: 'ArgumentGroups'
   },
-  exclusions: ['name', '_']
+  exclusions: {
+    options: ['name', '_']
+  }
 };
 
 function defaultYargsFailHandler (msg: string, err: Error, yin: yargs.Argv)

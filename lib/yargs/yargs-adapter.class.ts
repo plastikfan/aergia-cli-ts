@@ -49,7 +49,7 @@ export class YargsAdapter implements types.IYargsAdapter {
 
             const pickedProperties: OptionDefType = R.pickBy(
               (pickedDef: OptionDefType, key: string): boolean => {
-                return !R.includes(key)(this.schema.exclusions);
+                return !R.includes(key)(this.schema.exclusions.options);
               })(optionDef);
 
             return [optionName, pickedProperties];
