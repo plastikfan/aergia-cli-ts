@@ -5,7 +5,7 @@ import * as yargs from 'yargs';
 import * as build from '../../lib/yargs/yargs-builder.class';
 import * as types from '../../lib/types';
 import { YargsAdapter } from '../../lib/yargs/yargs-adapter.class';
-import { YargsBuilderImpl } from '../../lib/yargs/yargs-builder.impl';
+import { YargsBuilderImpl, defaultHandlers } from '../../lib/yargs/yargs-builder.impl';
 
 const aeSchema: types.IAeYargsSchema = {
   labels: {
@@ -38,6 +38,7 @@ describe('YargsBuilder', () => {
       const builder: build.YargsBuilder = new build.YargsBuilder(
         instance,
         aeSchema,
+        defaultHandlers,
         handler
       );
 
@@ -111,6 +112,7 @@ describe('YargsBuilder', () => {
         const builder: build.YargsBuilder = new build.YargsBuilder(
           instance,
           aeSchema,
+          defaultHandlers,
           handler
         );
 
@@ -142,7 +144,8 @@ describe('YargsBuilder', () => {
       it('should: create yargs builder', () => {
         const builder: build.YargsBuilder = new build.YargsBuilder(
           instance,
-          aeSchema
+          aeSchema,
+          defaultHandlers
         );
         expect(builder).not.to.be.undefined();
       });
@@ -159,6 +162,7 @@ describe('YargsBuilder', () => {
         const builder: build.YargsBuilder = new build.YargsBuilder(
           instance,
           aeSchema,
+          defaultHandlers,
           handler
         );
         expect(builder).not.to.be.undefined();
@@ -177,6 +181,7 @@ describe('YargsBuilder', () => {
         const builder: build.YargsBuilder = new build.YargsBuilder(
           instance,
           aeSchema,
+          defaultHandlers,
           handler,
           adapter
         );
@@ -202,10 +207,11 @@ describe('YargsBuilder', () => {
         }
 
         const adapter = new YargsAdapter(aeSchema);
-        const impl = new YargsBuilderImpl(aeSchema, optionHandler);
+        const impl = new YargsBuilderImpl(aeSchema, optionHandler, defaultHandlers);
         const builder: build.YargsBuilder = new build.YargsBuilder(
           instance,
           aeSchema,
+          defaultHandlers,
           handler,
           adapter,
           impl
@@ -237,10 +243,11 @@ describe('YargsBuilder', () => {
         }
 
         const adapter = new YargsAdapter(aeSchema);
-        const impl = new YargsBuilderImpl(aeSchema, optionHandler);
+        const impl = new YargsBuilderImpl(aeSchema, optionHandler, defaultHandlers);
         const builder: build.YargsBuilder = new build.YargsBuilder(
           instance,
           aeSchema,
+          defaultHandlers,
           handler,
           adapter,
           impl,

@@ -4,11 +4,6 @@ import * as R from 'ramda';
 import * as types from '../types';
 import * as helpers from '../../lib/utils/helpers';
 
-export function defaultFailHandler (msg: string, err: Error, yin: yargs.Argv, ac: any)
-  : yargs.Argv {
-  return yin;
-}
-
 export function defaultOptionHandler (yin: yargs.Argv, optionName: string, optionDef: { [key: string]: any },
   positional: boolean)
   : yargs.Argv {
@@ -17,6 +12,29 @@ export function defaultOptionHandler (yin: yargs.Argv, optionName: string, optio
     ? yin.positional(optionName, optionDef)
     : yin.option(optionName, optionDef);
 }
+
+export function defaultBeforeCommandHandler (yin: yargs.Argv, commandDescription: string,
+  helpDescription: string, adaptedCommand: { [key: string]: any })
+  : yargs.Argv {
+  return yin;
+}
+
+export function defaultAfterCommandHandler (yin: yargs.Argv)
+  : yargs.Argv {
+  return yin;
+}
+
+export function defaultFailHandler (msg: string, err: Error, yin: yargs.Argv, ac: any)
+  : yargs.Argv {
+  return yin;
+}
+
+export const defaultHandlers: types.IAeYargsInternalBuildHandlers = {
+  onOption: defaultOptionHandler,
+  onBeforeCommand: defaultBeforeCommandHandler,
+  onAfterCommand: defaultAfterCommandHandler,
+  fail: defaultFailHandler
+};
 
 /**
  * @export
@@ -31,7 +49,22 @@ export class YargsBuilderImpl {
    * @memberof YargsBuilderImpl
    */
   constructor (private schema: types.IAeYargsSchema,
-    private handler: types.IAeYargsOptionHandler | null) { }
+    private handler: types.IAeYargsOptionHandler | null,
+    handlers: types.IAeYargsBuildHandlers) {
+
+    if (!handlers) {
+      this.handlers = defaultHandlers;
+    } else {
+      this.handlers = {
+        onOption: handlers.onOption ?? defaultHandlers.onOption,
+        onBeforeCommand: handlers.onBeforeCommand ?? defaultHandlers.onBeforeCommand,
+        onAfterCommand: handlers.onAfterCommand ?? defaultHandlers.onAfterCommand,
+        fail: handlers.fail ?? defaultHandlers.fail
+      };
+    }
+  }
+
+  readonly handlers: types.IAeYargsInternalBuildHandlers;
 
   /**
    * @method buildCommand
@@ -77,13 +110,14 @@ export class YargsBuilderImpl {
       ? this.decoratePositionalDef(commandName, positionalDef, argumentsDescendants)
       : commandName;
 
+    // *** beforeCommand(instance, commandDescription, helpDescription, adaptedCommand)
     result = instance.command(commandDescription, helpDescription,
       (yin: yargs.Argv): yargs.Argv => { // builder
         if (positionalDef) {
-          yin = this.handlePositional(yin, positionalDef, argumentsDescendants);
+          yin = this.handlePositional(yin, positionalDef, argumentsDescendants, adaptedCommand);
         }
 
-        yin = this.handleOptions(yin, positionalDef, argumentsDescendants);
+        yin = this.handleOptions(yin, positionalDef, argumentsDescendants, adaptedCommand);
 
         const validationGroupsObj = helpers.findDescendant(
           this.schema.labels.validationGroups, descendants, this.schema.labels.elements);
@@ -94,6 +128,7 @@ export class YargsBuilderImpl {
         }
         return yin;
       });
+    // *** afterCommand(instance)
 
     return result;
   } // command
@@ -150,12 +185,13 @@ export class YargsBuilderImpl {
    * @param {yargs.Argv} instance
    * @param {string} positionalStr
    * @param {{ [key: string]: {} }} argumentsMap
+   * @param {{ [key: string]: any }} adaptedCommand
    * @returns {yargs.Argv}
    * @memberof YargsBuilderImpl
    */
   public handlePositional (instance: yargs.Argv,
     positionalStr: string,
-    argumentsMap: { [key: string]: {} })
+    argumentsMap: { [key: string]: {} }, adaptedCommand: { [key: string]: any })
     : yargs.Argv {
     let yin = instance;
 
@@ -164,7 +200,7 @@ export class YargsBuilderImpl {
 
       yin = R.reduce((acc: yargs.Argv, argument: string): yargs.Argv => {
         const argumentDef: { [key: string]: any } = argumentsMap[argument];
-        return this.positional(acc, argument, argumentDef);
+        return this.positional(acc, argument, argumentDef, adaptedCommand);
       }, yin)(positionalArguments);
     }
 
@@ -180,10 +216,12 @@ export class YargsBuilderImpl {
    * @param {yargs.Argv} instance
    * @param {string} argumentName
    * @param {*} argumentDef
+   * @param {{ [key: string]: any }} adaptedCommand
    * @returns {yargs.Argv}
    * @memberof YargsBuilderImpl
    */
-  public positional (instance: yargs.Argv, argumentName: string, argumentDef: { [key: string]: any })
+  public positional (instance: yargs.Argv, argumentName: string,
+    argumentDef: { [key: string]: any }, adaptedCommand: { [key: string]: any })
   : yargs.Argv {
     const IS_POSITIONAL = true;
     const result = (this.handler)
@@ -204,7 +242,8 @@ export class YargsBuilderImpl {
    * @returns {yargs.Argv}
    * @memberof YargsBuilderImpl
    */
-  public handleOptions (instance: yargs.Argv, positionalDef: string, argumentsMap: { [key: string]: any })
+  public handleOptions (instance: yargs.Argv, positionalDef: string,
+    argumentsMap: { [key: string]: any }, adaptedCommand: { [key: string]: any })
   : yargs.Argv {
     const NON_POSITIONAL = false;
     let result = instance;

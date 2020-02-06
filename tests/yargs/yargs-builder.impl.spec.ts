@@ -5,7 +5,7 @@ import * as yargs from 'yargs';
 import * as R from 'ramda';
 import * as types from '../../lib/types';
 
-import { YargsBuilderImpl } from '../../lib/yargs/yargs-builder.impl';
+import { YargsBuilderImpl, defaultHandlers } from '../../lib/yargs/yargs-builder.impl';
 
 const aeSchema: types.IAeYargsSchema = {
   labels: {
@@ -32,7 +32,7 @@ describe('YargsBuilderImpl without custom option handler', () => {
   let instance: yargs.Argv;
 
   beforeEach(() => {
-    builderImpl = new YargsBuilderImpl(aeSchema, handler);
+    builderImpl = new YargsBuilderImpl(aeSchema, handler, defaultHandlers);
     instance = require('yargs');
   });
 
@@ -432,7 +432,7 @@ describe('YargsBuilderImpl WITH custom option handler', () => {
     context('Without any positional arguments', () => {
       context('given: a command with multiple options', () => {
         it('should: build command with multiple parsed options', () => {
-          const builderImpl: YargsBuilderImpl = new YargsBuilderImpl(aeSchema, handler);
+          const builderImpl: YargsBuilderImpl = new YargsBuilderImpl(aeSchema, handler, defaultHandlers);
           const command = {
             name: 'copy',
             describe: 'Copy file',
@@ -475,7 +475,7 @@ describe('YargsBuilderImpl WITH custom option handler', () => {
     context('With positional arguments', () => {
       context('given: a command multiple arguments', () => {
         it('should: build command with multiple parsed arguments', () => {
-          const builderImpl: YargsBuilderImpl = new YargsBuilderImpl(aeSchema, handler);
+          const builderImpl: YargsBuilderImpl = new YargsBuilderImpl(aeSchema, handler, defaultHandlers);
           const command = {
             name: 'copy',
             describe: 'Copy file',
@@ -528,7 +528,7 @@ describe('YargsBuilderImpl', () => {
 
   beforeEach(() => {
     instance = require('yargs');
-    builderImpl = new YargsBuilderImpl(aeSchema, handler);
+    builderImpl = new YargsBuilderImpl(aeSchema, handler, defaultHandlers);
   });
 
   context('decoratePositionalDef', () => {
@@ -591,13 +591,13 @@ describe('YargsBuilderImpl', () => {
   context('handlePositional', () => {
     context('given: undefined positional string', () => {
       it('should: do nothing', () => {
-        builderImpl.handlePositional(instance, undefined as unknown as string, {});
+        builderImpl.handlePositional(instance, undefined as unknown as string, {}, {});
       });
     });
 
     context('given: empty positional string', () => {
       it('should: do nothing', () => {
-        builderImpl.handlePositional(instance, '', {});
+        builderImpl.handlePositional(instance, '', {}, {});
       });
     });
   }); // handlePositional
@@ -651,7 +651,7 @@ describe('universal option/argument check', () => {
 
   beforeEach(() => {
     instance = require('yargs');
-    builderImpl = new YargsBuilderImpl(aeSchema, handler);
+    builderImpl = new YargsBuilderImpl(aeSchema, handler, defaultHandlers);
   });
 
   context('positional argument', () => {

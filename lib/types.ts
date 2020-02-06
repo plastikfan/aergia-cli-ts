@@ -45,17 +45,27 @@ export interface IDefaultAeYargsOptionCallback {
     positional: boolean): yargs.Argv;
 }
 
+// ===
+
 /**
- * @description The handler that the user passes into the builder. One of it's parameters is a
- * callback that the builder provides. The client should call this default callback in addition
- * to performing custom functionality.
+ * @description Invoked just prior to command creation
  *
  * @export
- * @interface IAeYargsCommandHandler
+ * @interface IAeYargsBeforeCommandHandler
  */
-export interface IAeYargsCommandHandler {
-  (yin: yargs.Argv, commandName: string, commandDef: { [key: string]: any },
-    callback: IDefaultAeYargsCommandCallback): yargs.Argv;
+export interface IAeYargsBeforeCommandHandler {
+  (yin: yargs.Argv, commandDescription: string, helpDescription: string,
+    adaptedCommand: { [key: string]: any}): yargs.Argv;
+}
+
+/**
+ * @description Invoked just after command creation
+ *
+ * @export
+ * @interface IAeYargsAfterCommandHandler
+ */
+export interface IAeYargsAfterCommandHandler {
+  (yin: yargs.Argv): yargs.Argv;
 }
 
 /**
@@ -77,11 +87,14 @@ export interface IDefaultAeYargsCommandCallback {
  * @export
  * @interface IAeYargsBuildHandlers
  */
-export interface IAeYargsBuildHandlers {
-  option: IAeYargsOptionHandler;
-  command: IAeYargsCommandHandler;
+export interface IAeYargsInternalBuildHandlers {
+  onOption: IAeYargsOptionHandler;
+  onBeforeCommand: IAeYargsBeforeCommandHandler;
+  onAfterCommand: IAeYargsAfterCommandHandler;
   fail: IFailHandler;
 }
+
+export type IAeYargsBuildHandlers = Partial<IAeYargsInternalBuildHandlers>;
 
 /**
  * @description Schema to provide a description of the cli being built
