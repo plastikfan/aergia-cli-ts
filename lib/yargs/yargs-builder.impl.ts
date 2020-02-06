@@ -56,7 +56,6 @@ export class YargsBuilderImpl {
    * @memberof YargsBuilderImpl
    */
   constructor (private schema: types.IAeYargsSchema,
-    private handler: types.IAeYargsOptionHandler | null,
     handlers: types.IAeYargsBuildHandlers) {
 
     if (!handlers) {

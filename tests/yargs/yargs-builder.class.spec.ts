@@ -38,8 +38,7 @@ describe('YargsBuilder', () => {
       const builder: build.YargsBuilder = new build.YargsBuilder(
         instance,
         aeSchema,
-        defaultHandlers,
-        handler
+        defaultHandlers
       );
 
       const command = {
@@ -108,12 +107,10 @@ describe('YargsBuilder', () => {
   context('go', () => {
     context('given: a correctly defined command', () => {
       it('should: return the parsed command line', () => {
-        const handler = null;
         const builder: build.YargsBuilder = new build.YargsBuilder(
           instance,
           aeSchema,
-          defaultHandlers,
-          handler
+          defaultHandlers
         );
 
         const command = {
@@ -151,24 +148,6 @@ describe('YargsBuilder', () => {
       });
     });
 
-    context('given: builder using non defaulted option handler', () => {
-      it('should: create yargs builder', () => {
-        const handler = (yin: yargs.Argv, optionName: string, optionDef: { [key: string]: any },
-          positional: boolean,
-          callback: types.IDefaultAeYargsOptionCallback): yargs.Argv => {
-          return callback(yin, optionName, optionDef, positional);
-        };
-
-        const builder: build.YargsBuilder = new build.YargsBuilder(
-          instance,
-          aeSchema,
-          defaultHandlers,
-          handler
-        );
-        expect(builder).not.to.be.undefined();
-      });
-    }); // given: builder using non defaulted option handler
-
     context('given: builder using non default adapter', () => {
       it('should: create yargs builder', () => {
         const handler = (yin: yargs.Argv, optionName: string, optionDef: { [key: string]: any },
@@ -182,7 +161,6 @@ describe('YargsBuilder', () => {
           instance,
           aeSchema,
           defaultHandlers,
-          handler,
           adapter
         );
         expect(builder).not.to.be.undefined();
@@ -207,12 +185,11 @@ describe('YargsBuilder', () => {
         }
 
         const adapter = new YargsAdapter(aeSchema);
-        const impl = new YargsBuilderImpl(aeSchema, optionHandler, defaultHandlers);
+        const impl = new YargsBuilderImpl(aeSchema, defaultHandlers);
         const builder: build.YargsBuilder = new build.YargsBuilder(
           instance,
           aeSchema,
           defaultHandlers,
-          handler,
           adapter,
           impl
         );
