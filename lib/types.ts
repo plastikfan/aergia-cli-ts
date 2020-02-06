@@ -28,6 +28,7 @@ export interface IFailHandler {
 export interface IAeYargsOptionHandler {
   (yin: yargs.Argv, optionName: string, optionDef: { [key: string]: any },
     positional: boolean,
+    adaptedCommand: { [key: string]: any },
     callback: IDefaultAeYargsOptionCallback): yargs.Argv;
 }
 

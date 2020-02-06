@@ -36,6 +36,11 @@ export const defaultHandlers: types.IAeYargsInternalBuildHandlers = {
   fail: defaultFailHandler
 };
 
+function resolve (local: types.IAeYargsOptionHandler | undefined, member: types.IAeYargsOptionHandler)
+  : types.IAeYargsOptionHandler {
+  return local ?? member;
+}
+
 // ==============================================================================
 
 /**
@@ -74,16 +79,17 @@ export class YargsBuilderImpl {
    *
    * @param {yargs.Argv} instance
    * @param {{ [key: string]: any }} adaptedCommand
-   * @param {types.IFailHandler} fail
+   * @param {types.IAeYargsOptionHandler} [optionHandler]
    * @returns {yargs.Argv}
    * @memberof YargsBuilderImpl
    */
-  public buildCommand (instance: yargs.Argv, adaptedCommand: { [key: string]: any })
+  public buildCommand (instance: yargs.Argv, adaptedCommand: { [key: string]: any },
+    optionHandler?: types.IAeYargsOptionHandler)
     : yargs.Argv {
 
     return this.command(instance.fail((m: string, e: Error, yin: yargs.Argv): yargs.Argv => {
       return this.handlers.fail(m, e, yin, adaptedCommand);
-    }), adaptedCommand);
+    }), adaptedCommand, optionHandler);
   } // buildCommand
 
   /**
@@ -92,10 +98,12 @@ export class YargsBuilderImpl {
    *
    * @param {yargs.Argv} instance
    * @param {*} adaptedCommand
+   * @param {types.IAeYargsOptionHandler} [optionHandler]
    * @returns {yargs.Argv}
    * @memberof YargsBuilderImpl
    */
-  public command (instance: yargs.Argv, adaptedCommand: { [key: string]: any })
+  public command (instance: yargs.Argv, adaptedCommand: { [key: string]: any },
+    optionHandler?: types.IAeYargsOptionHandler)
     : yargs.Argv {
 
     let result = instance;
@@ -119,7 +127,7 @@ export class YargsBuilderImpl {
           yin = this.handlePositional(yin, positionalDef, argumentsDescendants, adaptedCommand);
         }
 
-        yin = this.handleOptions(yin, positionalDef, argumentsDescendants, adaptedCommand);
+        yin = this.handleOptions(yin, positionalDef, argumentsDescendants, adaptedCommand, optionHandler);
 
         const validationGroupsObj = helpers.findDescendant(
           this.schema.labels.validationGroups, descendants, this.schema.labels.elements);
@@ -188,12 +196,14 @@ export class YargsBuilderImpl {
    * @param {string} positionalStr
    * @param {{ [key: string]: {} }} argumentsMap
    * @param {{ [key: string]: any }} adaptedCommand
+   * @param {types.IAeYargsOptionHandler} [optionHandler]
    * @returns {yargs.Argv}
    * @memberof YargsBuilderImpl
    */
   public handlePositional (instance: yargs.Argv,
     positionalStr: string,
-    argumentsMap: { [key: string]: {} }, adaptedCommand: { [key: string]: any })
+    argumentsMap: { [key: string]: {} }, adaptedCommand: { [key: string]: any },
+    optionHandler?: types.IAeYargsOptionHandler)
     : yargs.Argv {
     let yin = instance;
 
@@ -202,7 +212,7 @@ export class YargsBuilderImpl {
 
       yin = R.reduce((acc: yargs.Argv, argument: string): yargs.Argv => {
         const argumentDef: { [key: string]: any } = argumentsMap[argument];
-        return this.positional(acc, argument, argumentDef, adaptedCommand);
+        return this.positional(acc, argument, argumentDef, adaptedCommand, optionHandler);
       }, yin)(positionalArguments);
     }
 
@@ -219,16 +229,18 @@ export class YargsBuilderImpl {
    * @param {string} argumentName
    * @param {*} argumentDef
    * @param {{ [key: string]: any }} adaptedCommand
+   * @param {types.IAeYargsOptionHandler} [optionHandler]
    * @returns {yargs.Argv}
    * @memberof YargsBuilderImpl
    */
   public positional (instance: yargs.Argv, argumentName: string,
-    argumentDef: { [key: string]: any }, adaptedCommand: { [key: string]: any })
+    argumentDef: { [key: string]: any }, adaptedCommand: { [key: string]: any },
+    optionHandler?: types.IAeYargsOptionHandler)
   : yargs.Argv {
     const IS_POSITIONAL = true;
-    const result = (this.handler)
-      ? this.handler(instance, argumentName, argumentDef, IS_POSITIONAL, defaultOptionHandler)
-      : instance.positional(argumentName, argumentDef);
+
+    const result = resolve(optionHandler, this.handlers.onOption)(
+      instance, argumentName, argumentDef, IS_POSITIONAL, adaptedCommand, defaultOptionHandler);
 
     return result;
   } // positional
@@ -239,13 +251,15 @@ export class YargsBuilderImpl {
    *
    * @public
    * @param {yargs.Argv} instance
-   * @param {*} argumentsMap
    * @param {string} positionalDef
+   * @param {*} argumentsMap
+   * @param {types.IAeYargsOptionHandler} [optionHandler]
    * @returns {yargs.Argv}
    * @memberof YargsBuilderImpl
    */
   public handleOptions (instance: yargs.Argv, positionalDef: string,
-    argumentsMap: { [key: string]: any }, adaptedCommand: { [key: string]: any })
+    argumentsMap: { [key: string]: any }, adaptedCommand: { [key: string]: any },
+    optionHandler?: types.IAeYargsOptionHandler)
   : yargs.Argv {
     const NON_POSITIONAL = false;
     let result = instance;
@@ -255,17 +269,13 @@ export class YargsBuilderImpl {
     //
     const nonPositional = helpers.pickArguments(argumentsMap, positionalDef ?? '');
 
-    result = (this.handler)
-      ? R.reduce((acc: yargs.Argv, pair: [string, any]): yargs.Argv => {
-        const argumentName = pair[0];
-        let argumentDef: { [key: string]: any } = pair[1];
+    result = R.reduce((acc: yargs.Argv, pair: [string, any]): yargs.Argv => {
+      const argumentName = pair[0];
+      let argumentDef: { [key: string]: any } = pair[1];
 
-        // Strange that we need to cast away "null" from the handler here, especially since
-        // this is not required in this.positional.
-        //
-        return this.handler!(acc, argumentName, argumentDef, NON_POSITIONAL, defaultOptionHandler);
-      }, instance)(R.toPairs(nonPositional))
-      : instance.options(nonPositional);
+      return resolve(optionHandler, this.handlers.onOption)(
+        acc, argumentName, argumentDef, NON_POSITIONAL, adaptedCommand, defaultOptionHandler);
+    }, instance)(R.toPairs(nonPositional));
 
     return result;
   } // handleArguments

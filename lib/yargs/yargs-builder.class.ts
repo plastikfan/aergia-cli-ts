@@ -17,12 +17,14 @@ export class YargsBuilder {
    * @description build a single command
    *
    * @param {{ [key: string]: any }} command
+   * @param {types.IAeYargsOptionHandler} [optionHandler]
    * @returns {yargs.Argv}
    * @memberof YargsBuilder
    */
-  public buildCommand (command: { [key: string]: any }): yargs.Argv {
+  public buildCommand (command: { [key: string]: any }, optionHandler?: types.IAeYargsOptionHandler)
+  : yargs.Argv {
     const adaptedCommand = this.adapter.adapt(command);
-    return this.impl.buildCommand(this.instance, adaptedCommand);
+    return this.impl.buildCommand(this.instance, adaptedCommand, optionHandler);
   }
 
   /**
