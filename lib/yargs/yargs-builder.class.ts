@@ -12,11 +12,26 @@ export class YargsBuilder {
     private impl: YargsBuilderImpl = new YargsBuilderImpl(schema, handler),
     private fail: types.IFailHandler = defaultFailHandler) { }
 
-  public buildCommand (command: any): yargs.Argv {
+  /**
+   * @description build a single command
+   *
+   * @param {{ [key: string]: any }} command
+   * @returns {yargs.Argv}
+   * @memberof YargsBuilder
+   */
+  public buildCommand (command: { [key: string]: any }): yargs.Argv {
     const adaptedCommand = this.adapter.adapt(command);
     return this.impl.buildCommand(this.instance, adaptedCommand, this.fail);
   }
 
+  /**
+   * @description To be called by the user to indicate cli has finished being
+   * built and parsing should be executed.
+   *
+   * @param {yargs.Argv} instance
+   * @returns {{}}
+   * @memberof YargsBuilder
+   */
   public go (instance: yargs.Argv)
   : {} {
     return instance.argv;

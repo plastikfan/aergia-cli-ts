@@ -38,12 +38,12 @@ export class YargsBuilderImpl {
    * @description
    *
    * @param {yargs.Argv} instance
-   * @param {*} adaptedCommand
+   * @param {{ [key: string]: any }} adaptedCommand
    * @param {types.IFailHandler} fail
    * @returns {yargs.Argv}
    * @memberof YargsBuilderImpl
    */
-  public buildCommand (instance: yargs.Argv, adaptedCommand: any, fail: types.IFailHandler)
+  public buildCommand (instance: yargs.Argv, adaptedCommand: { [key: string]: any }, fail: types.IFailHandler)
     : yargs.Argv {
 
     return this.command(instance.fail((m: string, e: Error, yin: yargs.Argv): yargs.Argv => {
@@ -60,19 +60,19 @@ export class YargsBuilderImpl {
    * @returns {yargs.Argv}
    * @memberof YargsBuilderImpl
    */
-  public command (instance: yargs.Argv, adaptedCommand: any)
+  public command (instance: yargs.Argv, adaptedCommand: { [key: string]: any })
     : yargs.Argv {
 
     let result = instance;
     const commandName: string = R.prop(this.schema.labels.commandNameId)(adaptedCommand);
-    const helpDescription: string = R.prop('describe')(adaptedCommand);
+    const helpDescription: string = R.prop('describe')(adaptedCommand as { describe: string });
     const descendants: any[] = R.prop(this.schema.labels.descendants)(adaptedCommand);
 
     const commandArgumentsObj = helpers.findDescendant(
       this.schema.labels.commandOptions, descendants, this.schema.labels.elements);
     const argumentsDescendants: any = R.prop(this.schema.labels.descendants)(commandArgumentsObj);
 
-    const positionalDef: string = R.prop('positional')(adaptedCommand);
+    const positionalDef: string = R.prop('positional')(adaptedCommand as { positional: string });
     const commandDescription = positionalDef
       ? this.decoratePositionalDef(commandName, positionalDef, argumentsDescendants)
       : commandName;
@@ -163,7 +163,7 @@ export class YargsBuilderImpl {
       const positionalArguments = (R.split(' ')(positionalStr));
 
       yin = R.reduce((acc: yargs.Argv, argument: string): yargs.Argv => {
-        const argumentDef: any = argumentsMap[argument];
+        const argumentDef: { [key: string]: any } = argumentsMap[argument];
         return this.positional(acc, argument, argumentDef);
       }, yin)(positionalArguments);
     }
@@ -183,7 +183,7 @@ export class YargsBuilderImpl {
    * @returns {yargs.Argv}
    * @memberof YargsBuilderImpl
    */
-  public positional (instance: yargs.Argv, argumentName: string, argumentDef: any)
+  public positional (instance: yargs.Argv, argumentName: string, argumentDef: { [key: string]: any })
   : yargs.Argv {
     const IS_POSITIONAL = true;
     const result = (this.handler)
