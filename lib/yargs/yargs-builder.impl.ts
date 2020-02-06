@@ -39,12 +39,11 @@ export class YargsBuilderImpl {
    *
    * @param {yargs.Argv} instance
    * @param {*} adaptedCommand
-   * @param {(msg: string, err: Error, inst: yargs.Argv, ac: any) => yargs.Argv} fail
+   * @param {types.IFailHandler} fail
    * @returns {yargs.Argv}
    * @memberof YargsBuilderImpl
    */
-  public buildCommand (instance: yargs.Argv, adaptedCommand: any,
-    fail: (msg: string, err: Error, yin: yargs.Argv, ac: any) => yargs.Argv)
+  public buildCommand (instance: yargs.Argv, adaptedCommand: any, fail: types.IFailHandler)
     : yargs.Argv {
 
     return this.command(instance.fail((m: string, e: Error, yin: yargs.Argv): yargs.Argv => {

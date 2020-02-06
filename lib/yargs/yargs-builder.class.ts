@@ -10,7 +10,7 @@ export class YargsBuilder {
     private handler: types.IAeYargsOptionHandler | null = null,
     private adapter: types.IYargsAdapter = new YargsAdapter(schema),
     private impl: YargsBuilderImpl = new YargsBuilderImpl(schema, handler),
-    private fail: (msg: string, err: Error, inst: yargs.Argv, ac: any) => yargs.Argv = defaultFailHandler) { }
+    private fail: types.IFailHandler = defaultFailHandler) { }
 
   public buildCommand (command: any): yargs.Argv {
     const adaptedCommand = this.adapter.adapt(command);
