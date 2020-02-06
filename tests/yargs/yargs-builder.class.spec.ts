@@ -202,7 +202,7 @@ describe('YargsBuilder', () => {
         }
 
         const adapter = new YargsAdapter(aeSchema);
-        const impl = new YargsBuilderImpl(optionHandler, aeSchema);
+        const impl = new YargsBuilderImpl(aeSchema, optionHandler);
         const builder: build.YargsBuilder = new build.YargsBuilder(
           instance,
           aeSchema,
@@ -237,7 +237,7 @@ describe('YargsBuilder', () => {
         }
 
         const adapter = new YargsAdapter(aeSchema);
-        const impl = new YargsBuilderImpl(optionHandler, aeSchema);
+        const impl = new YargsBuilderImpl(aeSchema, optionHandler);
         const builder: build.YargsBuilder = new build.YargsBuilder(
           instance,
           aeSchema,

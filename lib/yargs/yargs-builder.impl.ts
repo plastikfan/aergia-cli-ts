@@ -24,10 +24,14 @@ export function defaultOptionHandler (yin: yargs.Argv, optionName: string, optio
  */
 export class YargsBuilderImpl {
 
-  constructor (private handler: types.IDefaultAeYargsOptionHandler | null,
-    private schema: types.IAeYargsSchema) {
-
-  }
+  /**
+   * @description Creates an instance of YargsBuilderImpl.
+   * @param {types.IAeYargsSchema} schema
+   * @param {(types.IDefaultAeYargsOptionHandler | null)} handler
+   * @memberof YargsBuilderImpl
+   */
+  constructor (private schema: types.IAeYargsSchema,
+    private handler: types.IDefaultAeYargsOptionHandler | null) { }
 
   /**
    * @method buildCommand

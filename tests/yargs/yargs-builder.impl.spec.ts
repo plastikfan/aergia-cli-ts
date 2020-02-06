@@ -31,7 +31,7 @@ describe('YargsBuilderImpl without custom option handler', () => {
   let instance: yargs.Argv;
 
   beforeEach(() => {
-    builderImpl = new YargsBuilderImpl(handler, aeSchema);
+    builderImpl = new YargsBuilderImpl(aeSchema, handler);
     instance = require('yargs');
   });
 
@@ -431,7 +431,7 @@ describe('YargsBuilderImpl WITH custom option handler', () => {
     context('Without any positional arguments', () => {
       context('given: a command with multiple options', () => {
         it('should: build command with multiple parsed options', () => {
-          const builderImpl: YargsBuilderImpl = new YargsBuilderImpl(handler, aeSchema);
+          const builderImpl: YargsBuilderImpl = new YargsBuilderImpl(aeSchema, handler);
           const command = {
             name: 'copy',
             describe: 'Copy file',
@@ -474,7 +474,7 @@ describe('YargsBuilderImpl WITH custom option handler', () => {
     context('With positional arguments', () => {
       context('given: a command multiple arguments', () => {
         it('should: build command with multiple parsed arguments', () => {
-          const builderImpl: YargsBuilderImpl = new YargsBuilderImpl(handler, aeSchema);
+          const builderImpl: YargsBuilderImpl = new YargsBuilderImpl(aeSchema, handler);
           const command = {
             name: 'copy',
             describe: 'Copy file',
@@ -527,7 +527,7 @@ describe('YargsBuilderImpl', () => {
 
   beforeEach(() => {
     instance = require('yargs');
-    builderImpl = new YargsBuilderImpl(handler, aeSchema);
+    builderImpl = new YargsBuilderImpl(aeSchema, handler);
   });
 
   context('decoratePositionalDef', () => {
@@ -650,7 +650,7 @@ describe('universal option/argument check', () => {
 
   beforeEach(() => {
     instance = require('yargs');
-    builderImpl = new YargsBuilderImpl(handler, aeSchema);
+    builderImpl = new YargsBuilderImpl(aeSchema, handler);
   });
 
   context('positional argument', () => {
