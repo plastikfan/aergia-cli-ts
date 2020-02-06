@@ -7,7 +7,7 @@ export class YargsBuilder {
 
   constructor (private instance: yargs.Argv,
     private schema: types.IAeYargsSchema,
-    private handler: types.IDefaultAeYargsOptionHandler | null = null,
+    private handler: types.IAeYargsOptionHandler | null = null,
     private adapter: types.IYargsAdapter = new YargsAdapter(schema),
     private impl: YargsBuilderImpl = new YargsBuilderImpl(schema, handler),
     private fail: (msg: string, err: Error, inst: yargs.Argv, ac: any) => yargs.Argv = defaultFailHandler) { }

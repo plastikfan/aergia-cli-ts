@@ -1,5 +1,3 @@
-import { functify } from 'jinxed';
-
 import { use, expect } from 'chai';
 import dirtyChai = require('dirty-chai');
 use(dirtyChai);
@@ -33,7 +31,7 @@ describe('YargsBuilder', () => {
     it('should: build command', () => {
       const handler = (yin: yargs.Argv, optionName: string, optionDef: { [key: string]: any },
         positional: boolean,
-        callback: types.IAeYargsOptionCallback): yargs.Argv => {
+        callback: types.IDefaultAeYargsOptionCallback): yargs.Argv => {
         return callback(yin, optionName, optionDef, positional);
       };
 
@@ -154,7 +152,7 @@ describe('YargsBuilder', () => {
       it('should: create yargs builder', () => {
         const handler = (yin: yargs.Argv, optionName: string, optionDef: { [key: string]: any },
           positional: boolean,
-          callback: types.IAeYargsOptionCallback): yargs.Argv => {
+          callback: types.IDefaultAeYargsOptionCallback): yargs.Argv => {
           return callback(yin, optionName, optionDef, positional);
         };
 
@@ -171,7 +169,7 @@ describe('YargsBuilder', () => {
       it('should: create yargs builder', () => {
         const handler = (yin: yargs.Argv, optionName: string, optionDef: { [key: string]: any },
           positional: boolean,
-          callback: types.IAeYargsOptionCallback): yargs.Argv => {
+          callback: types.IDefaultAeYargsOptionCallback): yargs.Argv => {
           return callback(yin, optionName, optionDef, positional);
         };
 
@@ -190,7 +188,7 @@ describe('YargsBuilder', () => {
       it('should: create yargs builder', () => {
         const handler = (yin: yargs.Argv, optionName: string, optionDef: { [key: string]: any },
           positional: boolean,
-          callback: types.IAeYargsOptionCallback): yargs.Argv => {
+          callback: types.IDefaultAeYargsOptionCallback): yargs.Argv => {
           return callback(yin, optionName, optionDef, positional);
         };
 
@@ -220,7 +218,7 @@ describe('YargsBuilder', () => {
       it('should: create yargs builder', () => {
         const handler = (yin: yargs.Argv, optionName: string, optionDef: { [key: string]: any },
           positional: boolean,
-          callback: types.IAeYargsOptionCallback): yargs.Argv => {
+          callback: types.IDefaultAeYargsOptionCallback): yargs.Argv => {
           return callback(yin, optionName, optionDef, positional);
         };
 

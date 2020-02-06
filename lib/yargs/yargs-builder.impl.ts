@@ -27,11 +27,11 @@ export class YargsBuilderImpl {
   /**
    * @description Creates an instance of YargsBuilderImpl.
    * @param {types.IAeYargsSchema} schema
-   * @param {(types.IDefaultAeYargsOptionHandler | null)} handler
+   * @param {(types.IAeYargsOptionHandler | null)} handler
    * @memberof YargsBuilderImpl
    */
   constructor (private schema: types.IAeYargsSchema,
-    private handler: types.IDefaultAeYargsOptionHandler | null) { }
+    private handler: types.IAeYargsOptionHandler | null) { }
 
   /**
    * @method buildCommand

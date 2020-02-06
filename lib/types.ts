@@ -23,12 +23,12 @@ export interface IFailHandler {
  * to performing custom functionality.
  *
  * @export
- * @interface IDefaultAeYargsOptionHandler
+ * @interface IAeYargsOptionHandler
  */
-export interface IDefaultAeYargsOptionHandler {
+export interface IAeYargsOptionHandler {
   (yin: yargs.Argv, optionName: string, optionDef: { [key: string]: any },
     positional: boolean,
-    callback: IAeYargsOptionCallback): yargs.Argv;
+    callback: IDefaultAeYargsOptionCallback): yargs.Argv;
 }
 
 /**
@@ -36,9 +36,9 @@ export interface IDefaultAeYargsOptionHandler {
  * IDefaultAeYargsOptionHandler except for callback parameter, which of course is not required.
  *
  * @export
- * @interface IAeYargsOptionCallback
+ * @interface IDefaultAeYargsOptionCallback
  */
-export interface IAeYargsOptionCallback {
+export interface IDefaultAeYargsOptionCallback {
   (yin: yargs.Argv,
     optionName: string,
     optionDef: { [key: string]: any },
@@ -78,7 +78,7 @@ export interface IDefaultAeYargsCommandCallback {
  * @interface IAeYargsBuildHandlers
  */
 export interface IAeYargsBuildHandlers {
-  option: IDefaultAeYargsOptionHandler;
+  option: IAeYargsOptionHandler;
   command: IAeYargsCommandHandler;
   fail: IFailHandler;
 }

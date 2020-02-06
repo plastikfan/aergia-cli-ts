@@ -1,5 +1,4 @@
-import { functify } from 'jinxed';
-import { expect, assert, use } from 'chai';
+import { expect, use } from 'chai';
 import dirtyChai = require('dirty-chai');
 use(dirtyChai);
 import * as yargs from 'yargs';
@@ -412,7 +411,7 @@ describe('YargsBuilderImpl without custom option handler', () => {
 describe('YargsBuilderImpl WITH custom option handler', () => {
   let instance: yargs.Argv;
   let invoked: boolean;
-  let handler: types.IDefaultAeYargsOptionHandler;
+  let handler: types.IAeYargsOptionHandler;
 
   beforeEach(() => {
     instance = require('yargs');
@@ -422,7 +421,7 @@ describe('YargsBuilderImpl WITH custom option handler', () => {
       optionName: string,
       optionDef: { [key: string]: any },
       positional: boolean,
-      callback: types.IAeYargsOptionCallback): yargs.Argv => {
+      callback: types.IDefaultAeYargsOptionCallback): yargs.Argv => {
       const result = callback(yin, optionName, optionDef, positional);
       invoked = true;
       return result;

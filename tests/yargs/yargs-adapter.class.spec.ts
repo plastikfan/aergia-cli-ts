@@ -1,9 +1,6 @@
-import { functify } from 'jinxed';
-import { expect, assert, use } from 'chai';
+import { use } from 'chai';
 import dirtyChai = require('dirty-chai');
 use(dirtyChai);
-import * as yargs from 'yargs';
-import * as R from 'ramda';
 import * as types from '../../lib/types';
 import { YargsAdapter } from '../../lib/yargs/yargs-adapter.class';
 
