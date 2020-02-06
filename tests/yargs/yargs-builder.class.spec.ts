@@ -219,42 +219,5 @@ describe('YargsBuilder', () => {
         expect(builder).not.to.be.undefined();
       });
     }); // given: builder using non default impl
-
-    context('given: builder using non default fail handler', () => {
-      it('should: create yargs builder', () => {
-        const handler = (yin: yargs.Argv, optionName: string, optionDef: { [key: string]: any },
-          positional: boolean,
-          callback: types.IDefaultAeYargsOptionCallback): yargs.Argv => {
-          return callback(yin, optionName, optionDef, positional);
-        };
-
-        function optionHandler (yin: yargs.Argv, optionName: string, optionDef: { [key: string]: any },
-          positional: boolean)
-          : yargs.Argv {
-
-          return positional
-            ? yin.positional(optionName, optionDef)
-            : yin.option(optionName, optionDef);
-        }
-
-        function failHandler (msg: string, err: Error, yin: yargs.Argv, ac: any)
-          : yargs.Argv {
-          return yin;
-        }
-
-        const adapter = new YargsAdapter(aeSchema);
-        const impl = new YargsBuilderImpl(aeSchema, optionHandler, defaultHandlers);
-        const builder: build.YargsBuilder = new build.YargsBuilder(
-          instance,
-          aeSchema,
-          defaultHandlers,
-          handler,
-          adapter,
-          impl,
-          failHandler
-        );
-        expect(builder).not.to.be.undefined();
-      });
-    }); // given: builder using non default impl
   }); // YargsBuilder constructor defaults
 }); // YargsBuilder

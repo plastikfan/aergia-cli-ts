@@ -36,6 +36,8 @@ export const defaultHandlers: types.IAeYargsInternalBuildHandlers = {
   fail: defaultFailHandler
 };
 
+// ==============================================================================
+
 /**
  * @export
  * @class YargsBuilderImpl
@@ -76,11 +78,11 @@ export class YargsBuilderImpl {
    * @returns {yargs.Argv}
    * @memberof YargsBuilderImpl
    */
-  public buildCommand (instance: yargs.Argv, adaptedCommand: { [key: string]: any }, fail: types.IFailHandler)
+  public buildCommand (instance: yargs.Argv, adaptedCommand: { [key: string]: any })
     : yargs.Argv {
 
     return this.command(instance.fail((m: string, e: Error, yin: yargs.Argv): yargs.Argv => {
-      return fail(m, e, yin, adaptedCommand);
+      return this.handlers.fail(m, e, yin, adaptedCommand);
     }), adaptedCommand);
   } // buildCommand
 

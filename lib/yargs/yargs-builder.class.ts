@@ -7,11 +7,11 @@ export class YargsBuilder {
 
   constructor (private instance: yargs.Argv,
     private schema: types.IAeYargsSchema,
-    private handlers: types.IAeYargsBuildHandlers | null = defaultHandlers,
+    private handlers: types.IAeYargsBuildHandlers = defaultHandlers,
     private handler: types.IAeYargsOptionHandler | null = null,
     private adapter: types.IYargsAdapter = new YargsAdapter(schema),
-    private impl: YargsBuilderImpl = new YargsBuilderImpl(schema, handler, handlers ?? defaultHandlers),
-    private fail: types.IFailHandler = defaultFailHandler) { }
+    private impl: YargsBuilderImpl = new YargsBuilderImpl(schema, handler, handlers ?? defaultHandlers)
+  ) { }
 
   /**
    * @description build a single command
@@ -22,7 +22,7 @@ export class YargsBuilder {
    */
   public buildCommand (command: { [key: string]: any }): yargs.Argv {
     const adaptedCommand = this.adapter.adapt(command);
-    return this.impl.buildCommand(this.instance, adaptedCommand, this.fail);
+    return this.impl.buildCommand(this.instance, adaptedCommand);
   }
 
   /**

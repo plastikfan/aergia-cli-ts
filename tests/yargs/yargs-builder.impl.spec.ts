@@ -55,7 +55,7 @@ describe('YargsBuilderImpl without custom option handler', () => {
               }
             ]
           };
-          const yin = builderImpl.buildCommand(instance, command, defaultYargsFailHandler);
+          const yin = builderImpl.buildCommand(instance, command);
           const result = yin.parse(['copy', '-t', '~/destination/front.jpg']);
 
           expect(result.t).to.equal('~/destination/front.jpg');
@@ -88,7 +88,7 @@ describe('YargsBuilderImpl without custom option handler', () => {
               }
             ]
           };
-          const yin = builderImpl.buildCommand(instance, command, defaultYargsFailHandler);
+          const yin = builderImpl.buildCommand(instance, command);
           const result = yin.parse(['copy', '-t', '~/destination/front.jpg',
             '--log', '~/logs/fs.log', '-o', '$(whoami)']);
 
@@ -127,7 +127,7 @@ describe('YargsBuilderImpl without custom option handler', () => {
               }
             ]
           };
-          const yin = builderImpl.buildCommand(instance, command, defaultYargsFailHandler);
+          const yin = builderImpl.buildCommand(instance, command);
           const result = yin.parse(['copy', '~/source/front.jpg', '-t', '~/destination/front.jpg']);
 
           expect(result.from).to.equal('~/source/front.jpg');
@@ -166,7 +166,7 @@ describe('YargsBuilderImpl without custom option handler', () => {
               }
             ]
           };
-          const yin = builderImpl.buildCommand(instance, command, defaultYargsFailHandler);
+          const yin = builderImpl.buildCommand(instance, command);
           const result = yin.parse(['copy', '~/source/front.jpg',
             '-t', '~/destination/front.jpg', '--log', '~/logs/fs.log', '-o', '$(whoami)']);
 
@@ -212,7 +212,7 @@ describe('YargsBuilderImpl without custom option handler', () => {
               }
             ]
           };
-          const yin = builderImpl.buildCommand(instance, command, defaultYargsFailHandler);
+          const yin = builderImpl.buildCommand(instance, command);
           const result = yin.parse(['copy', '~/source/front.jpg',
             '~/destination/front.jpg', '--log', '~/logs/fs.log', '-o', '$(whoami)']);
 
@@ -256,7 +256,7 @@ describe('YargsBuilderImpl without custom option handler', () => {
               ]
             };
             expect(() => {
-              builderImpl.buildCommand(instance, command, defaultYargsFailHandler);
+              builderImpl.buildCommand(instance, command);
             }).to.throw();
           });
         }); // given: a command with missing positional argument definition
@@ -269,6 +269,10 @@ describe('YargsBuilderImpl without custom option handler', () => {
               invoked = true;
               return yin;
             }
+            const myDefaultHandlers: types.IAeYargsBuildHandlers = {
+              fail: failHandler
+            };
+            const myBuilderImpl = new YargsBuilderImpl(aeSchema, handler, myDefaultHandlers);
 
             const command = {
               name: 'paint',
@@ -285,7 +289,7 @@ describe('YargsBuilderImpl without custom option handler', () => {
                 }
               ]
             };
-            const yin = builderImpl.buildCommand(instance, command, failHandler);
+            const yin = myBuilderImpl.buildCommand(instance, command);
             yin.parse(['paint', '--colour', 'green']);
             expect(invoked).to.be.true();
           });
@@ -333,7 +337,7 @@ describe('YargsBuilderImpl without custom option handler', () => {
               }
             ]
           };
-          const yin = builderImpl.buildCommand(instance, command, defaultYargsFailHandler);
+          const yin = builderImpl.buildCommand(instance, command);
           const result = yin.parse(['copy', '-t', '~/destination/front.jpg',
             '--log', '~/logs/fs.log']);
 
@@ -387,7 +391,7 @@ describe('YargsBuilderImpl without custom option handler', () => {
               }
             ]
           };
-          const yin = builderImpl.buildCommand(instance, command, defaultYargsFailHandler);
+          const yin = builderImpl.buildCommand(instance, command);
           const result = yin.parse(['copy', '~/source/front.jpg',
             '~/destination/front.jpg', '--log', '~/logs/fs.log', '-o', '$(whoami)']);
 
@@ -456,7 +460,7 @@ describe('YargsBuilderImpl WITH custom option handler', () => {
               }
             ]
           };
-          const yin = builderImpl.buildCommand(instance, command, defaultYargsFailHandler);
+          const yin = builderImpl.buildCommand(instance, command);
           const result = yin.parse(['copy', '-t', '~/destination/front.jpg',
             '--log', '~/logs/fs.log', '-o', '$(whoami)']);
 
@@ -502,7 +506,7 @@ describe('YargsBuilderImpl WITH custom option handler', () => {
               }
             ]
           };
-          const yin = builderImpl.buildCommand(instance, command, defaultYargsFailHandler);
+          const yin = builderImpl.buildCommand(instance, command);
           const result = yin.parse(['copy', '~/source/front.jpg',
             '~/destination/front.jpg', '--log', '~/logs/fs.log', '-o', '$(whoami)']);
 
@@ -692,7 +696,7 @@ describe('universal option/argument check', () => {
               }
             ]
           });
-          const yin = builderImpl.buildCommand(instance, command, defaultYargsFailHandler);
+          const yin = builderImpl.buildCommand(instance, command);
           const result = optionValue
             ? yin.parse(['invoke', optionValue])
             : yin.parse(['invoke']);
@@ -758,7 +762,7 @@ describe('universal option/argument check', () => {
               }
             ]
           });
-          const yin = builderImpl.buildCommand(instance, command, defaultYargsFailHandler);
+          const yin = builderImpl.buildCommand(instance, command);
           const result = optionValue
             ? yin.parse(['invoke', '--widget', optionValue])
             : yin.parse(['invoke', '--widget']);
