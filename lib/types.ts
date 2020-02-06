@@ -92,7 +92,7 @@ export interface IAeYargsInternalBuildHandlers {
   onOption: IAeYargsOptionHandler;
   onBeforeCommand: IAeYargsBeforeCommandHandler;
   onAfterCommand: IAeYargsAfterCommandHandler;
-  fail: IFailHandler;
+  onFail: IFailHandler;
 }
 
 export type IAeYargsBuildHandlers = Partial<IAeYargsInternalBuildHandlers>;

@@ -29,12 +29,6 @@ describe('YargsBuilder', () => {
 
   context('given: command with positional and non positional options', () => {
     it('should: build command', () => {
-      const handler = (yin: yargs.Argv, optionName: string, optionDef: { [key: string]: any },
-        positional: boolean,
-        callback: types.IDefaultAeYargsOptionCallback): yargs.Argv => {
-        return callback(yin, optionName, optionDef, positional);
-      };
-
       const builder: build.YargsBuilder = new build.YargsBuilder(
         instance,
         aeSchema,
@@ -148,7 +142,7 @@ describe('YargsBuilder', () => {
       });
     });
 
-    context('given: builder using non default adapter', () => {
+    context('given: builder using non default option handler', () => {
       it('should: create yargs builder', () => {
         const handler = (yin: yargs.Argv, optionName: string, optionDef: { [key: string]: any },
           positional: boolean,
@@ -156,6 +150,79 @@ describe('YargsBuilder', () => {
           return callback(yin, optionName, optionDef, positional);
         };
 
+        const handlers: types.IAeYargsBuildHandlers = {
+          onOption: handler
+        };
+
+        const builder: build.YargsBuilder = new build.YargsBuilder(
+          instance,
+          aeSchema,
+          handlers
+        );
+        expect(builder).not.to.be.undefined();
+      });
+    }); // given: builder using non default option handler
+
+    context('given: builder using non default before command handler', () => {
+      it('should: create yargs builder', () => {
+        function handler (yin: yargs.Argv, commandDescription: string,
+          helpDescription: string, adaptedCommand: { [key: string]: any })
+          : yargs.Argv {
+          return yin;
+        }
+        const handlers: types.IAeYargsBuildHandlers = {
+          onBeforeCommand: handler
+        };
+
+        const builder: build.YargsBuilder = new build.YargsBuilder(
+          instance,
+          aeSchema,
+          handlers
+        );
+        expect(builder).not.to.be.undefined();
+      });
+    }); // given: builder using non default before command handler
+
+    context('given: builder using non default after command handler', () => {
+      it('should: create yargs builder', () => {
+        function handler (yin: yargs.Argv)
+          : yargs.Argv {
+          return yin;
+        }
+        const handlers: types.IAeYargsBuildHandlers = {
+          onAfterCommand: handler
+        };
+
+        const builder: build.YargsBuilder = new build.YargsBuilder(
+          instance,
+          aeSchema,
+          handlers
+        );
+        expect(builder).not.to.be.undefined();
+      });
+    }); // given: builder using non default after command handler
+
+    context('given: builder using non default fail handler', () => {
+      it('should: create yargs builder', () => {
+        function handler (msg: string, err: Error, yin: yargs.Argv, ac: any)
+          : yargs.Argv {
+          return yin;
+        }
+        const handlers: types.IAeYargsBuildHandlers = {
+          onFail: handler
+        };
+
+        const builder: build.YargsBuilder = new build.YargsBuilder(
+          instance,
+          aeSchema,
+          handlers
+        );
+        expect(builder).not.to.be.undefined();
+      });
+    }); // given: builder using non default fail handler
+
+    context('given: builder using non default adapter', () => {
+      it('should: create yargs builder', () => {
         const adapter = new YargsAdapter(aeSchema);
         const builder: build.YargsBuilder = new build.YargsBuilder(
           instance,
@@ -169,29 +236,14 @@ describe('YargsBuilder', () => {
 
     context('given: builder using non default impl', () => {
       it('should: create yargs builder', () => {
-        const handler = (yin: yargs.Argv, optionName: string, optionDef: { [key: string]: any },
-          positional: boolean,
-          callback: types.IDefaultAeYargsOptionCallback): yargs.Argv => {
-          return callback(yin, optionName, optionDef, positional);
-        };
-
-        function optionHandler (yin: yargs.Argv, optionName: string, optionDef: { [key: string]: any },
-          positional: boolean)
-          : yargs.Argv {
-
-          return positional
-            ? yin.positional(optionName, optionDef)
-            : yin.option(optionName, optionDef);
-        }
-
         const adapter = new YargsAdapter(aeSchema);
-        const impl = new YargsBuilderImpl(aeSchema, defaultHandlers);
+        const myImpl = new YargsBuilderImpl(aeSchema, defaultHandlers);
         const builder: build.YargsBuilder = new build.YargsBuilder(
           instance,
           aeSchema,
           defaultHandlers,
           adapter,
-          impl
+          myImpl
         );
         expect(builder).not.to.be.undefined();
       });

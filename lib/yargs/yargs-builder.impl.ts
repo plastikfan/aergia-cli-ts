@@ -16,6 +16,7 @@ export function defaultOptionHandler (yin: yargs.Argv, optionName: string, optio
 export function defaultBeforeCommandHandler (yin: yargs.Argv, commandDescription: string,
   helpDescription: string, adaptedCommand: { [key: string]: any })
   : yargs.Argv {
+
   return yin;
 }
 
@@ -33,7 +34,7 @@ export const defaultHandlers: types.IAeYargsInternalBuildHandlers = {
   onOption: defaultOptionHandler,
   onBeforeCommand: defaultBeforeCommandHandler,
   onAfterCommand: defaultAfterCommandHandler,
-  fail: defaultFailHandler
+  onFail: defaultFailHandler
 };
 
 function resolve (local: types.IAeYargsOptionHandler | undefined, member: types.IAeYargsOptionHandler)
@@ -65,7 +66,7 @@ export class YargsBuilderImpl {
         onOption: handlers.onOption ?? defaultHandlers.onOption,
         onBeforeCommand: handlers.onBeforeCommand ?? defaultHandlers.onBeforeCommand,
         onAfterCommand: handlers.onAfterCommand ?? defaultHandlers.onAfterCommand,
-        fail: handlers.fail ?? defaultHandlers.fail
+        onFail: handlers.onFail ?? defaultHandlers.onFail
       };
     }
   }
@@ -87,7 +88,7 @@ export class YargsBuilderImpl {
     : yargs.Argv {
 
     return this.command(instance.fail((m: string, e: Error, yin: yargs.Argv): yargs.Argv => {
-      return this.handlers.fail(m, e, yin, adaptedCommand);
+      return this.handlers.onFail(m, e, yin, adaptedCommand);
     }), adaptedCommand, optionHandler);
   } // buildCommand
 

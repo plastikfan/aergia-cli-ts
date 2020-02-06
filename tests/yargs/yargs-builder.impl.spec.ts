@@ -269,7 +269,7 @@ describe('YargsBuilderImpl without custom option handler', () => {
               return yin;
             }
             const myDefaultHandlers: types.IAeYargsBuildHandlers = {
-              fail: failHandler
+              onFail: failHandler
             };
             const myBuilderImpl = new YargsBuilderImpl(aeSchema, myDefaultHandlers);
 
@@ -412,24 +412,123 @@ describe('YargsBuilderImpl without custom option handler', () => {
 }); // YargsBuilderImpl without custom option handler
 
 describe('YargsBuilderImpl WITH custom option handler', () => {
+  const command = {
+    name: 'copy',
+    describe: 'Copy file',
+    _children: [
+      {
+        _: 'Arguments',
+        _children: {
+          to: {
+            alias: 't',
+            describe: 'destination file location'
+          }
+        }
+      }
+    ]
+  };
+
   let instance: yargs.Argv;
-  let invoked: boolean;
-  let handler: types.IAeYargsOptionHandler;
+  let memberInvoked: boolean;
+
+  function memberOptionHandler (yin: yargs.Argv, optionName: string, optionDef: { [key: string]: any },
+    positional: boolean)
+    : yargs.Argv {
+    memberInvoked = true;
+
+    return positional
+      ? yin.positional(optionName, optionDef)
+      : yin.option(optionName, optionDef);
+  }
+
+  function memberBeforeCommandHandler (yin: yargs.Argv, commandDescription: string,
+    helpDescription: string, adaptedCommand: { [key: string]: any })
+    : yargs.Argv {
+    memberInvoked = true;
+
+    return yin;
+  }
+
+  function memberAfterCommandHandler (yin: yargs.Argv)
+    : yargs.Argv {
+    memberInvoked = true;
+
+    return yin;
+  }
 
   beforeEach(() => {
     instance = require('yargs');
-    invoked = false;
-
-    handler = (yin: yargs.Argv,
-      optionName: string,
-      optionDef: { [key: string]: any },
-      positional: boolean,
-      callback: types.IDefaultAeYargsOptionCallback): yargs.Argv => {
-      const result = callback(yin, optionName, optionDef, positional);
-      invoked = true;
-      return result;
-    };
+    memberInvoked = false;
   });
+
+  context('member handlers invocation', () => {
+    context('given: custom option handler', () => {
+      it('should: invoke custom option handler', () => {
+        const handlers: types.IAeYargsBuildHandlers = {
+          onOption: memberOptionHandler
+        };
+
+        const myImpl: YargsBuilderImpl = new YargsBuilderImpl(aeSchema, handlers);
+        const yin = myImpl.buildCommand(instance, command);
+        yin.parse(['copy', '--to', '~/destination.front.jpg']);
+        expect(memberInvoked).to.be.true();
+      });
+    });
+
+    context('given: custom before command handler', () => {
+      it('should: invoke custom before command handler', () => {
+        const handlers: types.IAeYargsBuildHandlers = {
+          onBeforeCommand: memberBeforeCommandHandler
+        };
+
+        const myImpl: YargsBuilderImpl = new YargsBuilderImpl(aeSchema, handlers);
+        const yin = myImpl.buildCommand(instance, command);
+        yin.parse(['copy', '--to', '~/destination.front.jpg']);
+        expect(memberInvoked).to.be.true();
+      });
+    });
+
+    context('given: custom after command handler', () => {
+      it('should: invoke custom after command handler', () => {
+        const handlers: types.IAeYargsBuildHandlers = {
+          onAfterCommand: memberAfterCommandHandler
+        };
+
+        const myImpl: YargsBuilderImpl = new YargsBuilderImpl(aeSchema, handlers);
+        const yin = myImpl.buildCommand(instance, command);
+        yin.parse(['copy', '--to', '~/destination.front.jpg']);
+        expect(memberInvoked).to.be.true();
+      });
+    });
+  }); // member handlers invocation
+
+  context('local handler override member handlers', () => {
+    context('given: local option handler', () => {
+      it('should: local handler should override custom option handler', () => {
+        let overridden = false;
+
+        function localOptionHandler (yin: yargs.Argv, optionName: string, optionDef: { [key: string]: any },
+          positional: boolean)
+          : yargs.Argv {
+          overridden = true;
+
+          return positional
+            ? yin.positional(optionName, optionDef)
+            : yin.option(optionName, optionDef);
+        }
+
+        const handlers: types.IAeYargsBuildHandlers = {
+          onOption: memberOptionHandler
+        };
+
+        const builderImpl: YargsBuilderImpl = new YargsBuilderImpl(aeSchema, handlers);
+        const yin = builderImpl.buildCommand(instance, command, localOptionHandler);
+        yin.parse(['copy', '--to', '~/destination.front.jpg']);
+        expect(memberInvoked).to.be.false();
+        expect(overridden).to.be.true();
+      });
+    });
+  }); // local handler override member handlers
 
   context('Arguments only', () => {
     context('Without any positional arguments', () => {
@@ -526,7 +625,6 @@ describe('YargsBuilderImpl WITH custom option handler', () => {
 
 describe('YargsBuilderImpl', () => {
   let instance: yargs.Argv;
-  const handler: null = null;
   let builderImpl: YargsBuilderImpl;
 
   beforeEach(() => {
