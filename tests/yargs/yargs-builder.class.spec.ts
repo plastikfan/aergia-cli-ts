@@ -135,6 +135,16 @@ describe('YargsBuilder', () => {
       it('should: create yargs builder', () => {
         const builder: build.YargsBuilder = new build.YargsBuilder(
           instance,
+          aeSchema
+        );
+        expect(builder).not.to.be.undefined();
+      });
+    });
+
+    context('given: builder using client specified handlers', () => {
+      it('should: create yargs builder', () => {
+        const builder: build.YargsBuilder = new build.YargsBuilder(
+          instance,
           aeSchema,
           defaultHandlers
         );

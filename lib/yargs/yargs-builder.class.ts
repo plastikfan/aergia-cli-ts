@@ -9,7 +9,7 @@ export class YargsBuilder {
     private schema: types.IAeYargsSchema,
     private handlers: types.IAeYargsBuildHandlers = defaultHandlers,
     private adapter: types.IYargsAdapter = new YargsAdapter(schema),
-    private impl: YargsBuilderImpl = new YargsBuilderImpl(schema, handlers ?? defaultHandlers)
+    private impl: YargsBuilderImpl = new YargsBuilderImpl(schema, handlers)
   ) { }
 
   /**
