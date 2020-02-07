@@ -20,12 +20,6 @@ const aeSchema: types.IAeYargsSchema = {
   }
 };
 
-function defaultYargsFailHandler (msg: string, err: Error, yin: yargs.Argv)
-  : yargs.Argv {
-  // console.log(`*** defaultYargsFailHandler ===> FAIL: ${msg}`);
-  return yin;
-}
-
 describe('YargsBuilderImpl without custom option handler', () => {
   let builderImpl: YargsBuilderImpl;
   let instance: yargs.Argv;

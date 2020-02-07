@@ -1,16 +1,19 @@
 import * as yargs from 'yargs';
 import * as types from '../types';
 import { YargsAdapter } from './yargs-adapter.class';
-import { YargsBuilderImpl, defaultFailHandler, defaultHandlers } from './yargs-builder.impl';
+import { YargsBuilderImpl } from './yargs-builder.impl';
 
 export class YargsBuilder {
 
   constructor (private instance: yargs.Argv,
     private schema: types.IAeYargsSchema,
-    private handlers: types.IAeYargsBuildHandlers = defaultHandlers,
-    private adapter: types.IYargsAdapter = new YargsAdapter(schema),
-    private impl: YargsBuilderImpl = new YargsBuilderImpl(schema, handlers)
-  ) { }
+    private handlers?: types.IAeYargsBuildHandlers,
+    private adapter?: types.IYargsAdapter,
+    private impl?: YargsBuilderImpl
+  ) {
+    this.adapter = adapter ?? new YargsAdapter(schema);
+    this.impl = impl ?? new YargsBuilderImpl(schema, handlers);
+  }
 
   /**
    * @description build a single command
@@ -22,8 +25,8 @@ export class YargsBuilder {
    */
   public buildCommand (command: { [key: string]: any }, optionHandler?: types.IAeYargsOptionHandler)
   : yargs.Argv {
-    const adaptedCommand = this.adapter.adapt(command);
-    return this.impl.buildCommand(this.instance, adaptedCommand, optionHandler);
+    const adaptedCommand = this.adapter!.adapt(command);
+    return this.impl!.buildCommand(this.instance, adaptedCommand, optionHandler);
   }
 
   /**

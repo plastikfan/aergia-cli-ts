@@ -53,11 +53,11 @@ export class YargsBuilderImpl {
   /**
    * @description Creates an instance of YargsBuilderImpl.
    * @param {types.IAeYargsSchema} schema
-   * @param {(types.IAeYargsOptionHandler | null)} handler
+   * @param {types.IAeYargsBuildHandlers} [handlers]
    * @memberof YargsBuilderImpl
    */
   constructor (private schema: types.IAeYargsSchema,
-    handlers: types.IAeYargsBuildHandlers) {
+    handlers?: types.IAeYargsBuildHandlers) {
 
     if (!handlers) {
       this.handlers = defaultHandlers;
@@ -201,7 +201,8 @@ export class YargsBuilderImpl {
    */
   public handlePositional (instance: yargs.Argv,
     positionalStr: string,
-    argumentsMap: { [key: string]: {} }, adaptedCommand: { [key: string]: any },
+    argumentsMap: { [key: string]: {} },
+    adaptedCommand: { [key: string]: any },
     optionHandler?: types.IAeYargsOptionHandler)
     : yargs.Argv {
     let result = instance;
@@ -256,8 +257,10 @@ export class YargsBuilderImpl {
    * @returns {yargs.Argv}
    * @memberof YargsBuilderImpl
    */
-  public handleOptions (instance: yargs.Argv, positionalDef: string,
-    argumentsMap: { [key: string]: any }, adaptedCommand: { [key: string]: any },
+  public handleOptions (instance: yargs.Argv,
+    positionalDef: string,
+    argumentsMap: { [key: string]: any },
+    adaptedCommand: { [key: string]: any },
     optionHandler?: types.IAeYargsOptionHandler)
   : yargs.Argv {
     const NON_POSITIONAL = false;
