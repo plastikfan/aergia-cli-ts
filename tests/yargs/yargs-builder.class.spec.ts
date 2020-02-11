@@ -15,6 +15,9 @@ const aeSchema: types.IAeYargsSchema = {
     elements: '_',
     validationGroups: 'ArgumentGroups'
   },
+  paths: {
+    collective: 'commands'
+  },
   exclusions: {
     options: ['name', '_']
   }
@@ -259,4 +262,128 @@ describe('YargsBuilder', () => {
       });
     }); // given: builder using non default impl
   }); // YargsBuilder constructor defaults
+
+  context('collective', () => {
+    const copy = {
+      name: 'copy',
+      describe: 'Copy file',
+      positional: 'from to',
+      _children: [
+        {
+          _: 'Arguments',
+          _children: {
+            from: {
+              name: 'from',
+              describe: 'source file location',
+              _: 'Argument'
+            },
+            to: {
+              name: 'to',
+              describe: 'destination file location',
+              _: 'Argument'
+            }
+          }
+        }
+      ]
+    };
+
+    const move = {
+      name: 'move',
+      describe: 'Move file',
+      positional: 'from to',
+      _children: [
+        {
+          _: 'Arguments',
+          _children: {
+            from: {
+              name: 'from',
+              describe: 'source file location',
+              _: 'Argument'
+            },
+            to: {
+              name: 'to',
+              describe: 'destination file location',
+              _: 'Argument'
+            }
+          }
+        }
+      ]
+    };
+
+    context('given: collective specified as a map object', () => {
+      it('should: build all commands', () => {
+        const builder: build.YargsBuilder = new build.YargsBuilder(
+          instance,
+          aeSchema,
+          defaultHandlers
+        );
+
+        const container = {
+          commands: {
+            copy: copy,
+            move: move
+          }
+        };
+
+        builder.buildAllCommands(container);
+      });
+    });
+
+    context('given: collective specified as an array', () => {
+      it('should: build all commands', () => {
+        const builder: build.YargsBuilder = new build.YargsBuilder(
+          instance,
+          aeSchema,
+          defaultHandlers
+        );
+
+        const container = {
+          commands: [ copy, move ]
+        };
+
+        builder.buildAllCommands(container, (yin: yargs.Argv, optionName: string,
+          optionDef: { [key: string]: any },
+          positional: boolean,
+          adaptedCommand: { [key: string]: any },
+          callback: types.IDefaultAeYargsOptionCallback): yargs.Argv => yin);
+      });
+    });
+
+    context('given: collective path which does not exist', () => {
+      it('should: throw', () => {
+        const builder: build.YargsBuilder = new build.YargsBuilder(
+          instance,
+          aeSchema,
+          defaultHandlers
+        );
+
+        const container = {
+          misplaced: [ copy, move ]
+        };
+
+        expect(() => {
+          builder.buildAllCommands(container);
+        }).to.throw();
+      });
+    });
+
+    context('given: collective of invalid type', () => {
+      it('should: throw', () => {
+        const builder: build.YargsBuilder = new build.YargsBuilder(
+          instance,
+          aeSchema,
+          defaultHandlers
+        );
+
+        const container = {
+          commands: 'wrong-type',
+          misplaced: [copy, move]
+        };
+
+        expect(() => {
+          builder.buildAllCommands(container);
+        }).to.throw();
+      });
+    });
+  });
 }); // YargsBuilder

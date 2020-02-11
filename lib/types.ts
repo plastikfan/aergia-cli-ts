@@ -111,6 +111,9 @@ export interface IAeYargsSchema {
     elements: string,
     validationGroups: string
   };
+  paths: {
+    collective: string
+  };
   exclusions: {
     options: string[];
   };

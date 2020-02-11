@@ -12,6 +12,9 @@ const aeSchema: types.IAeYargsSchema = {
     elements: '_',
     validationGroups: 'ArgumentGroups'
   },
+  paths: {
+    collective: 'commands'
+  },
   exclusions: {
     options: ['name', '_']
   }
