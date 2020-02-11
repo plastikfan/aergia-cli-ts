@@ -22,7 +22,7 @@ export class YargsAdapter implements types.IYargsAdapter {
    * @returns {*}
    * @memberof YargsAdapter
    */
-  public adapt (command: any): any {
+  public adapt (command: { [key: string]: any }): any {
     const adaptedCommand = R.clone(command);
     const descendants: any = R.prop(this.schema.labels.descendants)(adaptedCommand);
 
@@ -49,7 +49,7 @@ export class YargsAdapter implements types.IYargsAdapter {
 
             const pickedProperties: OptionDefType = R.pickBy(
               (pickedDef: OptionDefType, key: string): boolean => {
-                return !R.includes(key)(this.schema.exclusions);
+                return !R.includes(key)(this.schema.exclusions.options);
               })(optionDef);
 
             return [optionName, pickedProperties];
