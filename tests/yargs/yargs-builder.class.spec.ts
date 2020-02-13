@@ -387,3 +387,63 @@ describe('YargsBuilder', () => {
     });
   });
 }); // YargsBuilder
+
+describe('default command', () => {
+  let instance: yargs.Argv;
+
+  beforeEach(() => {
+    instance = require('yargs');
+  });
+
+  context('given: More than a single command being marked as the default', () => {
+    it('should: throw', () => {
+      const copy = {
+        name: 'copy',
+        describe: 'Copy file',
+        default: true,
+        _children: [
+          {
+            _: 'Arguments',
+            _children: {
+              to: {
+                describe: 'destination file location'
+              }
+            }
+          }
+        ]
+      };
+
+      const move = {
+        name: 'move',
+        describe: 'Move file',
+        default: true,
+        _children: [
+          {
+            _: 'Arguments',
+            _children: {
+              to: {
+                describe: 'destination file location'
+              }
+            }
+          }
+        ]
+      };
+
+      const container = {
+        commands: {
+          copy: copy,
+          move: move
+        }
+      };
+
+      const builder: build.YargsBuilder = new build.YargsBuilder(
+        instance,
+        aeSchema
+      );
+
+      expect(() => {
+        builder.buildAllCommands(container);
+      }).to.throw();
+    });
+  });
+});

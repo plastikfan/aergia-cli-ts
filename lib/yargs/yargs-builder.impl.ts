@@ -72,6 +72,7 @@ export class YargsBuilderImpl {
   }
 
   readonly handlers: types.IAeYargsInternalBuildHandlers;
+  defaultCommand: string;
 
   /**
    * @method buildCommand
@@ -121,25 +122,39 @@ export class YargsBuilderImpl {
 
     let result = this.handlers.onBeforeCommand(instance, commandDescription, helpDescription, adaptedCommand);
 
-    result = result.command(commandDescription, helpDescription,
-      (yin: yargs.Argv): yargs.Argv => { // builder
-        if (positionalDef) {
-          yin = this.handlePositional(yin, positionalDef, argumentsDescendants, adaptedCommand);
-        }
+    const builder = (yin: yargs.Argv): yargs.Argv => {
+      if (positionalDef) {
+        yin = this.handlePositional(yin, positionalDef, argumentsDescendants, adaptedCommand);
+      }
 
-        yin = this.handleOptions(yin, positionalDef, argumentsDescendants, adaptedCommand, optionHandler);
+      yin = this.handleOptions(yin, positionalDef, argumentsDescendants, adaptedCommand, optionHandler);
 
-        const validationGroupsObj = helpers.findDescendant(
-          this.schema.labels.validationGroups, descendants, this.schema.labels.elements);
+      const validationGroupsObj = helpers.findDescendant(
+        this.schema.labels.validationGroups, descendants, this.schema.labels.elements);
 
-        if (validationGroupsObj) {
-          const groupsDescendants: any = R.prop(this.schema.labels.descendants)(validationGroupsObj);
-          yin = this.handleValidationGroups(yin, groupsDescendants);
-        }
-        return yin;
-      });
+      if (validationGroupsObj) {
+        const groupsDescendants: any = R.prop(this.schema.labels.descendants)(validationGroupsObj);
+        yin = this.handleValidationGroups(yin, groupsDescendants);
+      }
+      return yin;
+    };
 
-    return this.handlers.onAfterCommand(result);
+    result = result.command(commandDescription, helpDescription, builder);
+    result = this.handlers.onAfterCommand(result);
+
+    if (R.has('default')(adaptedCommand)) {
+      if (this.defaultCommand) {
+        throw new Error(
+          `Can't set default command to "${commandName}"; already been defined as "${this.defaultCommand}"`);
+      }
+      this.defaultCommand = commandName;
+      const defaultValue = R.prop('default')(adaptedCommand as { default: boolean });
+      if (defaultValue) {
+        result = result.command([commandName, '$0'], helpDescription, builder);
+      }
+    }
+
+    return result;
   } // command
 
   /**

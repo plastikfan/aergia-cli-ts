@@ -1,3 +1,4 @@
+import { functify } from 'jinxed';
 import { expect, use } from 'chai';
 import dirtyChai = require('dirty-chai');
 use(dirtyChai);
@@ -7,7 +8,7 @@ import * as types from '../../lib/types';
 
 import { YargsBuilderImpl, defaultHandlers } from '../../lib/yargs/yargs-builder.impl';
 
-const aeSchema: types.IAeYargsSchema = {
+const aeSchema: types.IAeYargsSchema = Object.freeze({
   labels: {
     commandNameId: 'name',
     commandOptions: 'Arguments',
@@ -21,7 +22,7 @@ const aeSchema: types.IAeYargsSchema = {
   exclusions: {
     options: ['name', '_']
   }
-};
+});
 
 describe('YargsBuilderImpl without custom option handler', () => {
   let builderImpl: YargsBuilderImpl;
@@ -409,7 +410,7 @@ describe('YargsBuilderImpl without custom option handler', () => {
 }); // YargsBuilderImpl without custom option handler
 
 describe('YargsBuilderImpl WITH custom option handler', () => {
-  const command = {
+  const command = Object.freeze({
     name: 'copy',
     describe: 'Copy file',
     _children: [
@@ -423,7 +424,7 @@ describe('YargsBuilderImpl WITH custom option handler', () => {
         }
       }
     ]
-  };
+  });
 
   let instance: yargs.Argv;
   let memberInvoked: boolean;
@@ -739,8 +740,121 @@ describe('YargsBuilderImpl', () => {
       });
     });
   }); // handleValidationGroups
-
 }); // YargsBuilderImpl
+
+describe('default command', () => {
+  let instance: yargs.Argv;
+  let builderImpl: YargsBuilderImpl;
+  let commandInvoked: string;
+
+  beforeEach(() => {
+    instance = require('yargs');
+    builderImpl = new YargsBuilderImpl(aeSchema, defaultHandlers);
+    commandInvoked = undefined as unknown as string;
+  });
+
+  function localOptionHandler (yin: yargs.Argv, optionName: string, optionDef: { [key: string]: any },
+    positional: boolean, adaptedCommand: { [key: string]: any },
+    callback: types.IDefaultAeYargsOptionCallback)
+    : yargs.Argv {
+
+    console.log(`>>> localOptionHandler, option: "${optionName}", command name: "${adaptedCommand.name}"`);
+    yin = callback(yin, optionName, optionDef, positional);
+    commandInvoked = adaptedCommand.name;
+
+    return positional
+      ? yin.positional(optionName, optionDef)
+      : yin.option(optionName, optionDef);
+  }
+
+  const copy = Object.freeze({
+    name: 'copy',
+    describe: 'Copy file',
+    default: true,
+    _children: [
+      {
+        _: 'Arguments',
+        _children: {
+          to: {
+            describe: 'destination file location'
+          }
+        }
+      }
+    ]
+  });
+
+  context('None positional options', () => {
+    context('given: a command has been marked as the default and missing from command line', () => {
+      it('should: invoke copy command', () => {
+        instance = builderImpl.buildCommand(instance, copy, localOptionHandler);
+
+        const result = instance.parse([
+          // copy command not specified here, but it has been set as the default command.
+          //
+          '--to', '~/destination/front.jpg'
+        ]);
+
+        expect(result.to).to.equal('~/destination/front.jpg');
+        expect(commandInvoked).to.equal('copy');
+      });
+    });
+
+    context('given: a command has been marked as the default and present on command line', () => {
+      it('should: invoke copy command', () => {
+        instance = builderImpl.buildCommand(instance, copy, localOptionHandler);
+
+        const result = instance.parse([
+          'copy', // <--
+          '--to', '~/destination/front.jpg'
+        ]);
+
+        expect(result.to).to.equal('~/destination/front.jpg');
+        expect(commandInvoked).to.equal('copy');
+      });
+    });
+  }); // None positional options
+
+  context('Positional arguments', () => {
+    // Positional arguments don't work on the default command when the command name is
+    // missing from he command line; arguments without an option key, turn up in "_" array.
+    // (See http://yargs.js.org/docs/#api-argv)
+    //
+    const commandWithPositionalArg = R.set(R.lensProp('positional'), 'to')(R.clone(copy));
+
+    context('given: a command has been marked as the default and missing from command line', () => {
+      it('should: invoke copy command', () => {
+        instance = builderImpl.buildCommand(instance, commandWithPositionalArg, localOptionHandler);
+
+        const result = instance.parse([
+          // copy command not specified here, but it has been set as the default command.
+          //
+          '~/destination/front.jpg'
+        ]);
+
+        const _: string[] = R.prop('_')(result);
+        expect(_[0]).to.equal('~/destination/front.jpg');
+        expect(result.to).to.be.undefined();
+      });
+    });
+  });
+
+  context('given: a command with falsy default setting and missing from command line', () => {
+    it('should: NOT invoke copy command', () => {
+      const falsyDefaultCopy = R.set(R.lensProp('default'), false)(R.clone(copy));
+      instance = builderImpl.buildCommand(instance, falsyDefaultCopy, localOptionHandler);
+
+      const result = instance.parse([
+        // copy command not specified here, but it has been set as the default command.
+        //
+        '--to', '~/destination/front.jpg'
+      ]);
+      console.log(`>>> result: ${functify(result)}`);
+
+      expect(result.to).to.equal('~/destination/front.jpg');
+      expect(commandInvoked).to.be.undefined();
+    });
+  });
+}); // default command
 
 describe('universal option/argument check', () => {
   let instance: yargs.Argv;
@@ -867,4 +981,4 @@ describe('universal option/argument check', () => {
       });
     });
   }); // non positional option
-});
+}); // universal option/argument check
