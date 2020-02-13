@@ -847,7 +847,6 @@ describe('default command', () => {
         //
         '--to', '~/destination/front.jpg'
       ]);
-      console.log(`>>> result: ${functify(result)}`);
 
       expect(result.to).to.equal('~/destination/front.jpg');
       expect(commandInvoked).to.be.undefined();
