@@ -758,7 +758,6 @@ describe('default command', () => {
     callback: types.IDefaultAeYargsOptionCallback)
     : yargs.Argv {
 
-    console.log(`>>> localOptionHandler, option: "${optionName}", command name: "${adaptedCommand.name}"`);
     yin = callback(yin, optionName, optionDef, positional);
     commandInvoked = adaptedCommand.name;
 
