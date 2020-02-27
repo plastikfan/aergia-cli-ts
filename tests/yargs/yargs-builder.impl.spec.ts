@@ -1,12 +1,11 @@
-import { functify } from 'jinxed';
 import { expect, use } from 'chai';
-import dirtyChai = require('dirty-chai');
-use(dirtyChai);
 import * as yargs from 'yargs';
 import * as R from 'ramda';
 import * as types from '../../lib/types';
 
 import { YargsBuilderImpl, defaultHandlers } from '../../lib/yargs/yargs-builder.impl';
+import dirtyChai = require('dirty-chai');
+use(dirtyChai);
 
 const aeSchema: types.IAeYargsSchema = Object.freeze({
   labels: {
@@ -757,7 +756,6 @@ describe('default command', () => {
     positional: boolean, adaptedCommand: { [key: string]: any },
     callback: types.IDefaultAeYargsOptionCallback)
     : yargs.Argv {
-
     yin = callback(yin, optionName, optionDef, positional);
     commandInvoked = adaptedCommand.name;
 

@@ -9,7 +9,6 @@ import { YargsBuilderImpl } from './yargs-builder.impl';
  * @class YargsBuilder
  */
 export class YargsBuilder {
-
   /**
    * @description Creates an instance of YargsBuilder.
    * @param {yargs.Argv} instance
@@ -65,7 +64,6 @@ export class YargsBuilder {
           const adaptedCommand = this.adapter!.adapt(command);
           return this.impl!.buildCommand(acc, adaptedCommand, optionHandler);
         }, this.instance)(collective);
-
       } else if (collective instanceof Object) {
         const commandKeys = R.keys(collective);
 
@@ -74,7 +72,6 @@ export class YargsBuilder {
           const adaptedCommand = this.adapter!.adapt(command);
           return this.impl!.buildCommand(acc, adaptedCommand, optionHandler);
         }, this.instance)(commandKeys);
-
       } else {
         throw new Error(`Commands found at path: ${this.schema.paths.collective} is malformed.`);
       }

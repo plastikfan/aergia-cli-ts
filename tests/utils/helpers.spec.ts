@@ -1,9 +1,8 @@
-import { functify } from 'jinxed';
 import { expect, use } from 'chai';
-import dirtyChai = require('dirty-chai'); use(dirtyChai);
-import sinonChai = require('sinon-chai'); use(sinonChai);
 import { uniquePairs, startsWithAny, pickArguments } from '../../lib/utils/helpers';
 import * as R from 'ramda';
+import dirtyChai = require('dirty-chai'); use(dirtyChai);
+import sinonChai = require('sinon-chai'); use(sinonChai);
 
 describe('helpers', () => {
   context('reduceUniquePair', () => {
