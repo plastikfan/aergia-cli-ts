@@ -1,11 +1,11 @@
 import { use, expect } from 'chai';
-import dirtyChai = require('dirty-chai');
-use(dirtyChai);
 import * as yargs from 'yargs';
 import * as build from '../../lib/yargs/yargs-builder.class';
 import * as types from '../../lib/types';
 import { YargsAdapter } from '../../lib/yargs/yargs-adapter.class';
 import { YargsBuilderImpl, defaultHandlers } from '../../lib/yargs/yargs-builder.impl';
+import dirtyChai = require('dirty-chai');
+use(dirtyChai);
 
 const aeSchema: types.IAeYargsSchema = {
   labels: {
@@ -338,7 +338,7 @@ describe('YargsBuilder', () => {
         );
 
         const container = {
-          commands: [ copy, move ]
+          commands: [copy, move]
         };
 
         builder.buildAllCommands(container, (yin: yargs.Argv, optionName: string,
@@ -358,7 +358,7 @@ describe('YargsBuilder', () => {
         );
 
         const container = {
-          misplaced: [ copy, move ]
+          misplaced: [copy, move]
         };
 
         expect(() => {

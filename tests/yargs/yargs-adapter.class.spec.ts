@@ -1,8 +1,8 @@
 import { use } from 'chai';
-import dirtyChai = require('dirty-chai');
-use(dirtyChai);
 import * as types from '../../lib/types';
 import { YargsAdapter } from '../../lib/yargs/yargs-adapter.class';
+import dirtyChai = require('dirty-chai');
+use(dirtyChai);
 
 const aeSchema: types.IAeYargsSchema = {
   labels: {
