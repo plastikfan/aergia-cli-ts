@@ -17,7 +17,6 @@
     "__b:dev:test": "webpack -d --env.mode development --config webpack.config.test.js",
     "exec": "node ./dist/aergia-cli-bundle.js",
     "lint": "(npx semistandard --verbose | npx snazzy) && npx eslint -c .eslintrc.js \"./lib/**/*.ts\" \"./tests/**/*.ts\" --no-error-on-unmatched-pattern",
-    "__lint": "(npx semistandard --verbose | npx snazzy) && npx eslint -c .eslintrc.js \"./lib/**/*.ts\" \"./tests/**/*.ts\" --no-error-on-unmatched-pattern",
     "fix": "npx eslint -c .eslintrc.js \"./lib/**/*.ts \" \"./tests/**/*.ts\" --fix --no-error-on-unmatched-pattern",
     "watch": "npm run clean && webpack --watch --env.mode development --config webpack.config.src.js",
     "watch:t": "npm run clean && webpack --watch --env.mode development --config webpack.config.test.js",
