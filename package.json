@@ -68,7 +68,7 @@
     "@types/node": "^13.1.6",
     "@types/ramda": "^0.26.40",
     "@types/yargs": "^15.0.2",
-    "jinxed": "0.0.2",
+    "jinxed": "^0.0.3",
     "ramda": "^0.26.1",
     "yargs": "^15.1.0"
   },
