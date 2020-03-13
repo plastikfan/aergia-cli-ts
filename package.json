@@ -66,7 +66,7 @@
   "homepage": "https://github.com/plastikfan/aergia-cli-ts#readme",
   "dependencies": {
     "@types/node": "^13.9.1",
-    "@types/ramda": "^0.26.41",
+    "@types/ramda": "^0.26.43",
     "@types/yargs": "^15.0.4",
     "jinxed": "0.0.3",
     "ramda": "^0.27.0",
@@ -85,7 +85,7 @@
     "commitizen": "^4.0.3",
     "coveralls": "^3.0.9",
     "cz-conventional-changelog": "^3.1.0",
-    "depcheck": "^0.9.1",
+    "depcheck": "^0.9.2",
     "dirty-chai": "^2.0.1",
     "json-loader": "^0.5.7",
     "mocha": "^7.1.0",
