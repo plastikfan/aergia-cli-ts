@@ -66,10 +66,10 @@
   "homepage": "https://github.com/plastikfan/aergia-cli-ts#readme",
   "dependencies": {
     "@types/node": "^13.7.1",
-    "@types/ramda": "^0.26.40",
-    "@types/yargs": "^15.0.2",
+    "@types/yargs": "^15.0.3",
+    "@types/ramda": "^0.26.41",
     "jinxed": "0.0.2",
-    "ramda": "^0.26.1",
+    "ramda": "^0.27.0",
     "yargs": "^15.1.0"
   },
   "devDependencies": {
