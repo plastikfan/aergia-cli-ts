@@ -184,7 +184,7 @@ export interface IJsonConversionSchema {
 // collection as opposed to be defined as a separate matcher in themselves.
 //
 export type CoercivePrimitiveStr = 'boolean' | 'number' | 'symbol';
-export const CoercivePrimitiveStrArray = ['boolean', 'number', 'symbol'];
+// export const CoercivePrimitiveStrArray = ['boolean', 'number', 'symbol'];
 export type CoercivePrimitiveType = boolean | number | symbol;
 
 /**

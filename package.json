@@ -4,8 +4,9 @@
   "description": "Lazy build of command line interface",
   "main": "dist/aergia-cli-bundle.js",
   "files": [
-    "dist/aergia-cli-bundle.js"
+    "dist"
   ],
+  "types": "./dist/index.d.ts",
   "scripts": {
     "clean": "rimraf dist",
     "t": "mocha",
