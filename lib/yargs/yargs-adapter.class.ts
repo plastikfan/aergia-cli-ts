@@ -1,4 +1,5 @@
 import * as R from 'ramda';
+import * as xib from '../xiberia.local';
 import * as types from '../types';
 import * as helpers from '../utils/helpers';
 
@@ -9,7 +10,7 @@ import * as helpers from '../utils/helpers';
  * @description
  */
 export class YargsAdapter implements types.IYargsAdapter {
-  constructor (private schema: types.IAeYargsSchema) { }
+  constructor (private schema: xib.IJsonConversionSchema) { }
 
   /**
    * @method adapt

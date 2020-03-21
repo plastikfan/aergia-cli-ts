@@ -1,5 +1,6 @@
 import * as yargs from 'yargs';
 import * as R from 'ramda';
+import * as xiberia from '../xiberia.local';
 import * as types from '../types';
 import { YargsAdapter } from './yargs-adapter.class';
 import { YargsBuilderImpl } from './yargs-builder.impl';
@@ -13,14 +14,14 @@ export class YargsBuilder {
    * @description Creates an instance of YargsBuilder.
    * @param {yargs.Argv} instance
    * @param {types.IAeYargsSchema} schema
-   * @param {types.IAeYargsBuildHandlers} [handlers]
+   * @param {xiberia.IAeYargsBuildHandlers} [handlers]
    * @param {types.IYargsAdapter} [adapter]
    * @param {YargsBuilderImpl} [impl]
    * @memberof YargsBuilder
    */
   constructor (private instance: yargs.Argv,
-    private schema: types.IAeYargsSchema,
-    private handlers?: types.IAeYargsBuildHandlers,
+    private schema: xiberia.IJsonConversionSchema,
+    private handlers?: xiberia.IAeYargsBuildHandlers,
     private adapter?: types.IYargsAdapter,
     private impl?: YargsBuilderImpl
   ) {
@@ -37,7 +38,7 @@ export class YargsBuilder {
    * @returns {yargs.Argv}
    * @memberof YargsBuilder
    */
-  public buildCommand (command: { [key: string]: any }, optionHandler?: types.IAeYargsOptionHandler)
+  public buildCommand (command: { [key: string]: any }, optionHandler?: xiberia.IAeYargsOptionHandler)
   : yargs.Argv {
     const adaptedCommand = this.adapter!.adapt(command);
     return this.impl!.buildCommand(this.instance, adaptedCommand, optionHandler);
@@ -53,7 +54,7 @@ export class YargsBuilder {
    * @returns {yargs.Argv}
    * @memberof YargsBuilder
    */
-  public buildAllCommands (container: { [key: string]: any }, optionHandler?: types.IAeYargsOptionHandler)
+  public buildAllCommands (container: { [key: string]: any }, optionHandler?: xiberia.IAeYargsOptionHandler)
   : yargs.Argv {
     const collectiveLens = R.lensPath(R.split('/')(this.schema.paths.collective));
     const collective = R.view(collectiveLens)(container);

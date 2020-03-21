@@ -1,13 +1,12 @@
 import { expect, use } from 'chai';
 import * as yargs from 'yargs';
 import * as R from 'ramda';
-import * as types from '../../lib/types';
-
+import * as xiberia from '../../lib/xiberia.local';
 import { YargsBuilderImpl, defaultHandlers } from '../../lib/yargs/yargs-builder.impl';
 import dirtyChai = require('dirty-chai');
 use(dirtyChai);
 
-const aeSchema: types.IAeYargsSchema = Object.freeze({
+const conversionSchema: xiberia.IJsonConversionSchema = Object.freeze({
   labels: {
     commandNameId: 'name',
     commandOptions: 'Arguments',
@@ -28,7 +27,7 @@ describe('YargsBuilderImpl without custom option handler', () => {
   let instance: yargs.Argv;
 
   beforeEach(() => {
-    builderImpl = new YargsBuilderImpl(aeSchema, defaultHandlers);
+    builderImpl = new YargsBuilderImpl(conversionSchema, defaultHandlers);
     instance = require('yargs');
   });
 
@@ -265,10 +264,10 @@ describe('YargsBuilderImpl without custom option handler', () => {
               invoked = true;
               return yin;
             }
-            const myDefaultHandlers: types.IAeYargsBuildHandlers = {
+            const myDefaultHandlers: xiberia.IAeYargsBuildHandlers = {
               onFail: failHandler
             };
-            const myBuilderImpl = new YargsBuilderImpl(aeSchema, myDefaultHandlers);
+            const myBuilderImpl = new YargsBuilderImpl(conversionSchema, myDefaultHandlers);
 
             const command = {
               name: 'paint',
@@ -461,11 +460,11 @@ describe('YargsBuilderImpl WITH custom option handler', () => {
   context('member handlers invocation', () => {
     context('given: custom option handler', () => {
       it('should: invoke custom option handler', () => {
-        const handlers: types.IAeYargsBuildHandlers = {
+        const handlers: xiberia.IAeYargsBuildHandlers = {
           onOption: memberOptionHandler
         };
 
-        const myImpl: YargsBuilderImpl = new YargsBuilderImpl(aeSchema, handlers);
+        const myImpl: YargsBuilderImpl = new YargsBuilderImpl(conversionSchema, handlers);
         const yin = myImpl.buildCommand(instance, command);
         yin.parse(['copy', '--to', '~/destination.front.jpg']);
         expect(memberInvoked).to.be.true();
@@ -474,11 +473,11 @@ describe('YargsBuilderImpl WITH custom option handler', () => {
 
     context('given: custom before command handler', () => {
       it('should: invoke custom before command handler', () => {
-        const handlers: types.IAeYargsBuildHandlers = {
+        const handlers: xiberia.IAeYargsBuildHandlers = {
           onBeforeCommand: memberBeforeCommandHandler
         };
 
-        const myImpl: YargsBuilderImpl = new YargsBuilderImpl(aeSchema, handlers);
+        const myImpl: YargsBuilderImpl = new YargsBuilderImpl(conversionSchema, handlers);
         const yin = myImpl.buildCommand(instance, command);
         yin.parse(['copy', '--to', '~/destination.front.jpg']);
         expect(memberInvoked).to.be.true();
@@ -487,11 +486,11 @@ describe('YargsBuilderImpl WITH custom option handler', () => {
 
     context('given: custom after command handler', () => {
       it('should: invoke custom after command handler', () => {
-        const handlers: types.IAeYargsBuildHandlers = {
+        const handlers: xiberia.IAeYargsBuildHandlers = {
           onAfterCommand: memberAfterCommandHandler
         };
 
-        const myImpl: YargsBuilderImpl = new YargsBuilderImpl(aeSchema, handlers);
+        const myImpl: YargsBuilderImpl = new YargsBuilderImpl(conversionSchema, handlers);
         const yin = myImpl.buildCommand(instance, command);
         yin.parse(['copy', '--to', '~/destination.front.jpg']);
         expect(memberInvoked).to.be.true();
@@ -514,11 +513,11 @@ describe('YargsBuilderImpl WITH custom option handler', () => {
             : yin.option(optionName, optionDef);
         }
 
-        const handlers: types.IAeYargsBuildHandlers = {
+        const handlers: xiberia.IAeYargsBuildHandlers = {
           onOption: memberOptionHandler
         };
 
-        const builderImpl: YargsBuilderImpl = new YargsBuilderImpl(aeSchema, handlers);
+        const builderImpl: YargsBuilderImpl = new YargsBuilderImpl(conversionSchema, handlers);
         const yin = builderImpl.buildCommand(instance, command, localOptionHandler);
         yin.parse(['copy', '--to', '~/destination.front.jpg']);
         expect(memberInvoked).to.be.false();
@@ -531,7 +530,7 @@ describe('YargsBuilderImpl WITH custom option handler', () => {
     context('Without any positional arguments', () => {
       context('given: a command with multiple options', () => {
         it('should: build command with multiple parsed options', () => {
-          const builderImpl: YargsBuilderImpl = new YargsBuilderImpl(aeSchema, defaultHandlers);
+          const builderImpl: YargsBuilderImpl = new YargsBuilderImpl(conversionSchema, defaultHandlers);
           const command = {
             name: 'copy',
             describe: 'Copy file',
@@ -574,7 +573,7 @@ describe('YargsBuilderImpl WITH custom option handler', () => {
     context('With positional arguments', () => {
       context('given: a command multiple arguments', () => {
         it('should: build command with multiple parsed arguments', () => {
-          const builderImpl: YargsBuilderImpl = new YargsBuilderImpl(aeSchema, defaultHandlers);
+          const builderImpl: YargsBuilderImpl = new YargsBuilderImpl(conversionSchema, defaultHandlers);
           const command = {
             name: 'copy',
             describe: 'Copy file',
@@ -626,7 +625,7 @@ describe('YargsBuilderImpl', () => {
 
   beforeEach(() => {
     instance = require('yargs');
-    builderImpl = new YargsBuilderImpl(aeSchema, defaultHandlers);
+    builderImpl = new YargsBuilderImpl(conversionSchema, defaultHandlers);
   });
 
   context('decoratePositionalDef', () => {
@@ -748,13 +747,13 @@ describe('default command', () => {
 
   beforeEach(() => {
     instance = require('yargs');
-    builderImpl = new YargsBuilderImpl(aeSchema, defaultHandlers);
+    builderImpl = new YargsBuilderImpl(conversionSchema, defaultHandlers);
     commandInvoked = undefined as unknown as string;
   });
 
   function localOptionHandler (yin: yargs.Argv, optionName: string, optionDef: { [key: string]: any },
     positional: boolean, adaptedCommand: { [key: string]: any },
-    callback: types.IDefaultAeYargsOptionCallback)
+    callback: xiberia.IDefaultAeYargsOptionCallback)
     : yargs.Argv {
     yin = callback(yin, optionName, optionDef, positional);
     commandInvoked = adaptedCommand.name;
@@ -858,7 +857,7 @@ describe('universal option/argument check', () => {
 
   beforeEach(() => {
     instance = require('yargs');
-    builderImpl = new YargsBuilderImpl(aeSchema, defaultHandlers);
+    builderImpl = new YargsBuilderImpl(conversionSchema, defaultHandlers);
   });
 
   context('positional argument', () => {
