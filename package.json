@@ -1,6 +1,6 @@
 {
   "name": "aergia-cli-ts",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "description": "Lazy build of command line interface",
   "main": "dist/aergia-cli-bundle.js",
   "files": [
