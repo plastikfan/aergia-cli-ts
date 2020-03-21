@@ -1,10 +1,10 @@
 import { use } from 'chai';
+import * as xiberia from '../../lib/xiberia.local';
+import { YargsAdapter } from '../../lib/yargs/yargs-adapter.class';
 import dirtyChai = require('dirty-chai');
 use(dirtyChai);
-import * as types from '../../lib/types';
-import { YargsAdapter } from '../../lib/yargs/yargs-adapter.class';
 
-const aeSchema: types.IAeYargsSchema = {
+const conversionSchema: xiberia.IJsonConversionSchema = {
   labels: {
     commandNameId: 'name',
     commandOptions: 'Arguments',
@@ -24,7 +24,7 @@ describe('YargsAdapter', () => {
   let adapter: YargsAdapter;
 
   beforeEach(() => {
-    adapter = new YargsAdapter(aeSchema);
+    adapter = new YargsAdapter(conversionSchema);
   });
 
   context('given: command with missing descendants', () => {

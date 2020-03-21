@@ -1,6 +1,4 @@
-
 import * as R from 'ramda';
-import * as types from '../types';
 
 /**
  * @method uniquePairs
@@ -84,7 +82,6 @@ export function findDescendant (descendant: string, descendants: any[], elementL
 
 export function findDescendantWithIndex (descendant: string, descendants: any[], elementLabel: string)
   : { descendant: any; index: number } {
-
   const fn = (el: any): boolean => {
     return el[elementLabel] === descendant;
   };

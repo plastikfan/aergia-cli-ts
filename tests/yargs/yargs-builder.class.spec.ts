@@ -1,13 +1,13 @@
 import { use, expect } from 'chai';
-import dirtyChai = require('dirty-chai');
-use(dirtyChai);
+import * as xiberia from '../../lib/xiberia.local';
 import * as yargs from 'yargs';
 import * as build from '../../lib/yargs/yargs-builder.class';
-import * as types from '../../lib/types';
 import { YargsAdapter } from '../../lib/yargs/yargs-adapter.class';
 import { YargsBuilderImpl, defaultHandlers } from '../../lib/yargs/yargs-builder.impl';
+import dirtyChai = require('dirty-chai');
+use(dirtyChai);
 
-const aeSchema: types.IAeYargsSchema = {
+const conversionSchema: xiberia.IJsonConversionSchema = {
   labels: {
     commandNameId: 'name',
     commandOptions: 'Arguments',
@@ -34,7 +34,7 @@ describe('YargsBuilder', () => {
     it('should: build command', () => {
       const builder: build.YargsBuilder = new build.YargsBuilder(
         instance,
-        aeSchema,
+        conversionSchema,
         defaultHandlers
       );
 
@@ -106,7 +106,7 @@ describe('YargsBuilder', () => {
       it('should: return the parsed command line', () => {
         const builder: build.YargsBuilder = new build.YargsBuilder(
           instance,
-          aeSchema,
+          conversionSchema,
           defaultHandlers
         );
 
@@ -138,7 +138,7 @@ describe('YargsBuilder', () => {
       it('should: create yargs builder', () => {
         const builder: build.YargsBuilder = new build.YargsBuilder(
           instance,
-          aeSchema
+          conversionSchema
         );
         expect(builder).not.to.be.undefined();
       });
@@ -148,7 +148,7 @@ describe('YargsBuilder', () => {
       it('should: create yargs builder', () => {
         const builder: build.YargsBuilder = new build.YargsBuilder(
           instance,
-          aeSchema,
+          conversionSchema,
           defaultHandlers
         );
         expect(builder).not.to.be.undefined();
@@ -159,17 +159,17 @@ describe('YargsBuilder', () => {
       it('should: create yargs builder', () => {
         const handler = (yin: yargs.Argv, optionName: string, optionDef: { [key: string]: any },
           positional: boolean,
-          callback: types.IDefaultAeYargsOptionCallback): yargs.Argv => {
+          callback: xiberia.IDefaultAeYargsOptionCallback): yargs.Argv => {
           return callback(yin, optionName, optionDef, positional);
         };
 
-        const handlers: types.IAeYargsBuildHandlers = {
+        const handlers: xiberia.IAeYargsBuildHandlers = {
           onOption: handler
         };
 
         const builder: build.YargsBuilder = new build.YargsBuilder(
           instance,
-          aeSchema,
+          conversionSchema,
           handlers
         );
         expect(builder).not.to.be.undefined();
@@ -183,13 +183,13 @@ describe('YargsBuilder', () => {
           : yargs.Argv {
           return yin;
         }
-        const handlers: types.IAeYargsBuildHandlers = {
+        const handlers: xiberia.IAeYargsBuildHandlers = {
           onBeforeCommand: handler
         };
 
         const builder: build.YargsBuilder = new build.YargsBuilder(
           instance,
-          aeSchema,
+          conversionSchema,
           handlers
         );
         expect(builder).not.to.be.undefined();
@@ -202,13 +202,13 @@ describe('YargsBuilder', () => {
           : yargs.Argv {
           return yin;
         }
-        const handlers: types.IAeYargsBuildHandlers = {
+        const handlers: xiberia.IAeYargsBuildHandlers = {
           onAfterCommand: handler
         };
 
         const builder: build.YargsBuilder = new build.YargsBuilder(
           instance,
-          aeSchema,
+          conversionSchema,
           handlers
         );
         expect(builder).not.to.be.undefined();
@@ -221,13 +221,13 @@ describe('YargsBuilder', () => {
           : yargs.Argv {
           return yin;
         }
-        const handlers: types.IAeYargsBuildHandlers = {
+        const handlers: xiberia.IAeYargsBuildHandlers = {
           onFail: handler
         };
 
         const builder: build.YargsBuilder = new build.YargsBuilder(
           instance,
-          aeSchema,
+          conversionSchema,
           handlers
         );
         expect(builder).not.to.be.undefined();
@@ -236,10 +236,10 @@ describe('YargsBuilder', () => {
 
     context('given: builder using non default adapter', () => {
       it('should: create yargs builder', () => {
-        const adapter = new YargsAdapter(aeSchema);
+        const adapter = new YargsAdapter(conversionSchema);
         const builder: build.YargsBuilder = new build.YargsBuilder(
           instance,
-          aeSchema,
+          conversionSchema,
           defaultHandlers,
           adapter
         );
@@ -249,11 +249,11 @@ describe('YargsBuilder', () => {
 
     context('given: builder using non default impl', () => {
       it('should: create yargs builder', () => {
-        const adapter = new YargsAdapter(aeSchema);
-        const myImpl = new YargsBuilderImpl(aeSchema, defaultHandlers);
+        const adapter = new YargsAdapter(conversionSchema);
+        const myImpl = new YargsBuilderImpl(conversionSchema, defaultHandlers);
         const builder: build.YargsBuilder = new build.YargsBuilder(
           instance,
-          aeSchema,
+          conversionSchema,
           defaultHandlers,
           adapter,
           myImpl
@@ -314,7 +314,7 @@ describe('YargsBuilder', () => {
       it('should: build all commands', () => {
         const builder: build.YargsBuilder = new build.YargsBuilder(
           instance,
-          aeSchema,
+          conversionSchema,
           defaultHandlers
         );
 
@@ -333,19 +333,19 @@ describe('YargsBuilder', () => {
       it('should: build all commands', () => {
         const builder: build.YargsBuilder = new build.YargsBuilder(
           instance,
-          aeSchema,
+          conversionSchema,
           defaultHandlers
         );
 
         const container = {
-          commands: [ copy, move ]
+          commands: [copy, move]
         };
 
         builder.buildAllCommands(container, (yin: yargs.Argv, optionName: string,
           optionDef: { [key: string]: any },
           positional: boolean,
           adaptedCommand: { [key: string]: any },
-          callback: types.IDefaultAeYargsOptionCallback): yargs.Argv => yin);
+          callback: xiberia.IDefaultAeYargsOptionCallback): yargs.Argv => yin);
       });
     });
 
@@ -353,12 +353,12 @@ describe('YargsBuilder', () => {
       it('should: throw', () => {
         const builder: build.YargsBuilder = new build.YargsBuilder(
           instance,
-          aeSchema,
+          conversionSchema,
           defaultHandlers
         );
 
         const container = {
-          misplaced: [ copy, move ]
+          misplaced: [copy, move]
         };
 
         expect(() => {
@@ -371,7 +371,7 @@ describe('YargsBuilder', () => {
       it('should: throw', () => {
         const builder: build.YargsBuilder = new build.YargsBuilder(
           instance,
-          aeSchema,
+          conversionSchema,
           defaultHandlers
         );
 
@@ -438,7 +438,7 @@ describe('default command', () => {
 
       const builder: build.YargsBuilder = new build.YargsBuilder(
         instance,
-        aeSchema
+        conversionSchema
       );
 
       expect(() => {

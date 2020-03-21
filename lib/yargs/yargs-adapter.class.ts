@@ -1,5 +1,5 @@
-import { functify } from 'jinxed';
 import * as R from 'ramda';
+import * as xiberia from '../xiberia.local';
 import * as types from '../types';
 import * as helpers from '../utils/helpers';
 
@@ -10,8 +10,7 @@ import * as helpers from '../utils/helpers';
  * @description
  */
 export class YargsAdapter implements types.IYargsAdapter {
-
-  constructor (private schema: types.IAeYargsSchema) { }
+  constructor (private schema: xiberia.IJsonConversionSchema) { }
 
   /**
    * @method adapt

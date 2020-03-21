@@ -1,13 +1,11 @@
-import { functify } from 'jinxed';
 import * as yargs from 'yargs';
 import * as R from 'ramda';
-import * as types from '../types';
+import * as xiberia from '../xiberia.local';
 import * as helpers from '../../lib/utils/helpers';
 
 export function defaultOptionHandler (yin: yargs.Argv, optionName: string, optionDef: { [key: string]: any },
   positional: boolean)
   : yargs.Argv {
-
   return positional
     ? yin.positional(optionName, optionDef)
     : yin.option(optionName, optionDef);
@@ -16,7 +14,6 @@ export function defaultOptionHandler (yin: yargs.Argv, optionName: string, optio
 export function defaultBeforeCommandHandler (yin: yargs.Argv, commandDescription: string,
   helpDescription: string, adaptedCommand: { [key: string]: any })
   : yargs.Argv {
-
   return yin;
 }
 
@@ -30,15 +27,15 @@ export function defaultFailHandler (msg: string, err: Error, yin: yargs.Argv, ac
   return yin;
 }
 
-export const defaultHandlers: types.IAeYargsInternalBuildHandlers = {
+export const defaultHandlers: xiberia.IAeYargsInternalBuildHandlers = {
   onOption: defaultOptionHandler,
   onBeforeCommand: defaultBeforeCommandHandler,
   onAfterCommand: defaultAfterCommandHandler,
   onFail: defaultFailHandler
 };
 
-function resolve (local: types.IAeYargsOptionHandler | undefined, member: types.IAeYargsOptionHandler)
-  : types.IAeYargsOptionHandler {
+function resolve (local: xiberia.IAeYargsOptionHandler | undefined, member: xiberia.IAeYargsOptionHandler)
+  : xiberia.IAeYargsOptionHandler {
   return local ?? member;
 }
 
@@ -49,18 +46,20 @@ function resolve (local: types.IAeYargsOptionHandler | undefined, member: types.
  * @class YargsBuilderImpl
  */
 export class YargsBuilderImpl {
-
   /**
    * @description Creates an instance of YargsBuilderImpl.
    * @param {types.IAeYargsSchema} schema
    * @param {types.IAeYargsBuildHandlers} [handlers]
    * @memberof YargsBuilderImpl
    */
-  constructor (private schema: types.IAeYargsSchema,
-    handlers?: types.IAeYargsBuildHandlers) {
-
+  constructor (private schema: xiberia.IJsonConversionSchema, handlers?: xiberia.IAeYargsBuildHandlers) {
     if (!handlers) {
-      this.handlers = defaultHandlers;
+      this.handlers = { // xib.IAeYargsInternalBuildHandlers
+        onOption: defaultOptionHandler,
+        onBeforeCommand: defaultBeforeCommandHandler,
+        onAfterCommand: defaultAfterCommandHandler,
+        onFail: defaultFailHandler
+      };
     } else {
       this.handlers = {
         onOption: handlers.onOption ?? defaultHandlers.onOption,
@@ -71,7 +70,7 @@ export class YargsBuilderImpl {
     }
   }
 
-  readonly handlers: types.IAeYargsInternalBuildHandlers;
+  readonly handlers: xiberia.IAeYargsInternalBuildHandlers;
   defaultCommand: string;
 
   /**
@@ -85,9 +84,8 @@ export class YargsBuilderImpl {
    * @memberof YargsBuilderImpl
    */
   public buildCommand (instance: yargs.Argv, adaptedCommand: { [key: string]: any },
-    optionHandler?: types.IAeYargsOptionHandler)
+    optionHandler?: xiberia.IAeYargsOptionHandler)
     : yargs.Argv {
-
     return this.command(instance.fail((m: string, e: Error, yin: yargs.Argv): yargs.Argv => {
       return this.handlers.onFail(m, e, yin, adaptedCommand);
     }), adaptedCommand, optionHandler);
@@ -104,9 +102,8 @@ export class YargsBuilderImpl {
    * @memberof YargsBuilderImpl
    */
   public command (instance: yargs.Argv, adaptedCommand: { [key: string]: any },
-    optionHandler?: types.IAeYargsOptionHandler)
+    optionHandler?: xiberia.IAeYargsOptionHandler)
     : yargs.Argv {
-
     const commandName: string = R.prop(this.schema.labels.commandNameId)(adaptedCommand);
     const helpDescription: string = R.prop('describe')(adaptedCommand as { describe: string });
     const descendants: any[] = R.prop(this.schema.labels.descendants)(adaptedCommand);
@@ -218,7 +215,7 @@ export class YargsBuilderImpl {
     positionalStr: string,
     argumentsMap: { [key: string]: {} },
     adaptedCommand: { [key: string]: any },
-    optionHandler?: types.IAeYargsOptionHandler)
+    optionHandler?: xiberia.IAeYargsOptionHandler)
     : yargs.Argv {
     let result = instance;
 
@@ -250,7 +247,7 @@ export class YargsBuilderImpl {
    */
   public positional (instance: yargs.Argv, argumentName: string,
     argumentDef: { [key: string]: any }, adaptedCommand: { [key: string]: any },
-    optionHandler?: types.IAeYargsOptionHandler)
+    optionHandler?: xiberia.IAeYargsOptionHandler)
   : yargs.Argv {
     const IS_POSITIONAL = true;
 
@@ -276,7 +273,7 @@ export class YargsBuilderImpl {
     positionalDef: string,
     argumentsMap: { [key: string]: any },
     adaptedCommand: { [key: string]: any },
-    optionHandler?: types.IAeYargsOptionHandler)
+    optionHandler?: xiberia.IAeYargsOptionHandler)
   : yargs.Argv {
     const NON_POSITIONAL = false;
 
@@ -287,7 +284,7 @@ export class YargsBuilderImpl {
 
     const result = R.reduce((acc: yargs.Argv, pair: [string, any]): yargs.Argv => {
       const argumentName = pair[0];
-      let argumentDef: { [key: string]: any } = pair[1];
+      const argumentDef: { [key: string]: any } = pair[1];
 
       return resolve(optionHandler, this.handlers.onOption)(
         acc, argumentName, argumentDef, NON_POSITIONAL, adaptedCommand, defaultOptionHandler);
