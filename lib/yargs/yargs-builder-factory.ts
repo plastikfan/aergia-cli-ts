@@ -10,11 +10,11 @@ import { YargsBuilder } from './yargs-builder.class';
  * @export
  * @param {yargs.Argv} instance
  * @param {xiberia.IJsonConversionSchema} schema
- * @param {xiberia.IAeYargsBuildHandlers} [handlers]
+ * @param {xiberia.IYargsBuildHandlers} [handlers]
  * @returns {YargsBuilder}
  */
 export function construct (instance: yargs.Argv,
   schema: xiberia.IJsonConversionSchema,
-  handlers?: xiberia.IAeYargsBuildHandlers): YargsBuilder {
+  handlers?: xiberia.IYargsBuildHandlers): YargsBuilder {
   return new YargsBuilder(instance, schema, handlers);
 }

@@ -264,7 +264,7 @@ describe('YargsBuilderImpl without custom option handler', () => {
               invoked = true;
               return yin;
             }
-            const myDefaultHandlers: xiberia.IAeYargsBuildHandlers = {
+            const myDefaultHandlers: xiberia.IYargsBuildHandlers = {
               onFail: failHandler
             };
             const myBuilderImpl = new YargsBuilderImpl(conversionSchema, myDefaultHandlers);
@@ -460,7 +460,7 @@ describe('YargsBuilderImpl WITH custom option handler', () => {
   context('member handlers invocation', () => {
     context('given: custom option handler', () => {
       it('should: invoke custom option handler', () => {
-        const handlers: xiberia.IAeYargsBuildHandlers = {
+        const handlers: xiberia.IYargsBuildHandlers = {
           onOption: memberOptionHandler
         };
 
@@ -473,7 +473,7 @@ describe('YargsBuilderImpl WITH custom option handler', () => {
 
     context('given: custom before command handler', () => {
       it('should: invoke custom before command handler', () => {
-        const handlers: xiberia.IAeYargsBuildHandlers = {
+        const handlers: xiberia.IYargsBuildHandlers = {
           onBeforeCommand: memberBeforeCommandHandler
         };
 
@@ -486,7 +486,7 @@ describe('YargsBuilderImpl WITH custom option handler', () => {
 
     context('given: custom after command handler', () => {
       it('should: invoke custom after command handler', () => {
-        const handlers: xiberia.IAeYargsBuildHandlers = {
+        const handlers: xiberia.IYargsBuildHandlers = {
           onAfterCommand: memberAfterCommandHandler
         };
 
@@ -513,7 +513,7 @@ describe('YargsBuilderImpl WITH custom option handler', () => {
             : yin.option(optionName, optionDef);
         }
 
-        const handlers: xiberia.IAeYargsBuildHandlers = {
+        const handlers: xiberia.IYargsBuildHandlers = {
           onOption: memberOptionHandler
         };
 
@@ -753,7 +753,7 @@ describe('default command', () => {
 
   function localOptionHandler (yin: yargs.Argv, optionName: string, optionDef: { [key: string]: any },
     positional: boolean, adaptedCommand: { [key: string]: any },
-    callback: xiberia.IDefaultAeYargsOptionCallback)
+    callback: xiberia.IDefaultYargsOptionCallback)
     : yargs.Argv {
     yin = callback(yin, optionName, optionDef, positional);
     commandInvoked = adaptedCommand.name;

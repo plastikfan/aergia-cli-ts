@@ -159,11 +159,11 @@ describe('YargsBuilder', () => {
       it('should: create yargs builder', () => {
         const handler = (yin: yargs.Argv, optionName: string, optionDef: { [key: string]: any },
           positional: boolean,
-          callback: xiberia.IDefaultAeYargsOptionCallback): yargs.Argv => {
+          callback: xiberia.IDefaultYargsOptionCallback): yargs.Argv => {
           return callback(yin, optionName, optionDef, positional);
         };
 
-        const handlers: xiberia.IAeYargsBuildHandlers = {
+        const handlers: xiberia.IYargsBuildHandlers = {
           onOption: handler
         };
 
@@ -183,7 +183,7 @@ describe('YargsBuilder', () => {
           : yargs.Argv {
           return yin;
         }
-        const handlers: xiberia.IAeYargsBuildHandlers = {
+        const handlers: xiberia.IYargsBuildHandlers = {
           onBeforeCommand: handler
         };
 
@@ -202,7 +202,7 @@ describe('YargsBuilder', () => {
           : yargs.Argv {
           return yin;
         }
-        const handlers: xiberia.IAeYargsBuildHandlers = {
+        const handlers: xiberia.IYargsBuildHandlers = {
           onAfterCommand: handler
         };
 
@@ -221,7 +221,7 @@ describe('YargsBuilder', () => {
           : yargs.Argv {
           return yin;
         }
-        const handlers: xiberia.IAeYargsBuildHandlers = {
+        const handlers: xiberia.IYargsBuildHandlers = {
           onFail: handler
         };
 
@@ -345,7 +345,7 @@ describe('YargsBuilder', () => {
           optionDef: { [key: string]: any },
           positional: boolean,
           adaptedCommand: { [key: string]: any },
-          callback: xiberia.IDefaultAeYargsOptionCallback): yargs.Argv => yin);
+          callback: xiberia.IDefaultYargsOptionCallback): yargs.Argv => yin);
       });
     });
 

@@ -28,7 +28,7 @@ export type PlainObject = {
  * @interface IYargsFailHandler
  */
 export interface IYargsFailHandler {
-  (msg: string, err: Error, inst: yargs.Argv, command: any): yargs.Argv;
+  (msg: string, err: Error, inst: yargs.Argv, command: PlainObject): yargs.Argv;
 }
 
 /**
@@ -36,9 +36,9 @@ export interface IYargsFailHandler {
  * IDefaultAeYargsOptionHandler except for callback parameter, which of course is not required.
  *
  * @export
- * @interface IDefaultAeYargsOptionCallback
+ * @interface IDefaultYargsOptionCallback
  */
-export interface IDefaultAeYargsOptionCallback {
+export interface IDefaultYargsOptionCallback {
   (yin: yargs.Argv,
     optionName: string,
     optionDef: PlainObject,
@@ -51,22 +51,22 @@ export interface IDefaultAeYargsOptionCallback {
  * to performing custom functionality.
  *
  * @export
- * @interface IAeYargsOptionHandler
+ * @interface IYargsOptionHandler
  */
-export interface IAeYargsOptionHandler {
+export interface IYargsOptionHandler {
   (yin: yargs.Argv, optionName: string, optionDef: PlainObject,
     positional: boolean,
     adaptedCommand: PlainObject,
-    callback: IDefaultAeYargsOptionCallback): yargs.Argv;
+    callback: IDefaultYargsOptionCallback): yargs.Argv;
 }
 
 /**
  * @description Invoked just prior to command creation
  *
  * @export
- * @interface IAeYargsBeforeCommandHandler
+ * @interface IYargsBeforeCommandHandler
  */
-export interface IAeYargsBeforeCommandHandler {
+export interface IYargsBeforeCommandHandler {
   (yin: yargs.Argv, commandDescription: string, helpDescription: string,
     adaptedCommand: PlainObject): yargs.Argv;
 }
@@ -75,9 +75,9 @@ export interface IAeYargsBeforeCommandHandler {
  * @description Invoked just after command creation
  *
  * @export
- * @interface IAeYargsAfterCommandHandler
+ * @interface IYargsAfterCommandHandler
  */
-export interface IAeYargsAfterCommandHandler {
+export interface IYargsAfterCommandHandler {
   (yin: yargs.Argv): yargs.Argv;
 }
 
@@ -86,9 +86,9 @@ export interface IAeYargsAfterCommandHandler {
  * IAeYargsCommandHandler except for callback parameter, which of course is not required.
  *
  * @export
- * @interface IDefaultAeYargsCommandCallback
+ * @interface IDefaultYargsCommandCallback
  */
-export interface IDefaultAeYargsCommandCallback {
+export interface IDefaultYargsCommandCallback {
   (yin: yargs.Argv,
     commandName: string,
     commandDef: PlainObject): yargs.Argv;
@@ -98,16 +98,16 @@ export interface IDefaultAeYargsCommandCallback {
  * @description Collection of handler functions
  *
  * @export
- * @interface IAeYargsBuildHandlers
+ * @interface IYargsBuildHandlers
  */
-export interface IAeYargsInternalBuildHandlers {
-  onOption: IAeYargsOptionHandler;
-  onBeforeCommand: IAeYargsBeforeCommandHandler;
-  onAfterCommand: IAeYargsAfterCommandHandler;
+export interface IYargsInternalBuildHandlers {
+  onOption: IYargsOptionHandler;
+  onBeforeCommand: IYargsBeforeCommandHandler;
+  onAfterCommand: IYargsAfterCommandHandler;
   onFail: IYargsFailHandler;
 }
 
-export type IAeYargsBuildHandlers = Partial<IAeYargsInternalBuildHandlers>;
+export type IYargsBuildHandlers = Partial<IYargsInternalBuildHandlers>;
 
 /**
  * @description Represents the main interface for building a Yargs CLI.
@@ -121,7 +121,7 @@ export interface IYargsApiBuilder {
    *
    * @param {PlainObject} command: JSON object containing yargs specific property information
    * required to build a yargs command.
-   * @param {IAeYargsOptionHandler} [optionHandler] Handler function that is called every time yargs
+   * @param {IYargsOptionHandler} [optionHandler] Handler function that is called every time yargs
    * encounters an option specifier. This handler can will override any handler that is provided
    * at construction time. The handler can augment the default behaviour or by pass it completely
    * by not calling the default handler (callback: IDefaultAeYargsOptionCallback).
@@ -129,14 +129,14 @@ export interface IYargsApiBuilder {
    * @returns {yargs.Argv}
    * @memberof IYargsApiBuilder
    */
-  buildCommand(command: PlainObject, optionHandler?: IAeYargsOptionHandler)
+  command(command: PlainObject, optionHandler?: IYargsOptionHandler)
     : yargs.Argv;
 
   /**
    * @description: builds all the command defined in the schema ('paths/collective').
    *
    * @param {PlainObject} container
-   * @param {IAeYargsOptionHandler} [optionHandler] Handler function that is called every time yargs
+   * @param {IYargsOptionHandler} [optionHandler] Handler function that is called every time yargs
    * encounters an option specifier. This handler can will override any handler that is provided
    * at construction time. The handler can augment the default behaviour or by pass it completely
    * by not calling the default handler (callback: IDefaultAeYargsOptionCallback)
@@ -144,9 +144,18 @@ export interface IYargsApiBuilder {
    * @returns {yargs.Argv}
    * @memberof IYargsApiBuilder
    */
-  buildAllCommands(container: PlainObject, optionHandler?: IAeYargsOptionHandler)
+  commands(container: PlainObject, optionHandler?: IYargsOptionHandler)
     : yargs.Argv;
 
+  /**
+   * @description Go and invoke the yargs API to build the cli. Returns the result of
+   * activating the yargs parser via the argv property. Clients should use this go
+   * method rather than invoking argv directly.
+   *
+   * @param {yargs.Argv} instance
+   * @returns {PlainObject}
+   * @memberof IYargsApiBuilder
+   */
   go(instance: yargs.Argv): PlainObject
 }
 
@@ -184,7 +193,7 @@ export interface IJsonConversionSchema {
 // collection as opposed to be defined as a separate matcher in themselves.
 //
 export type CoercivePrimitiveStr = 'boolean' | 'number' | 'symbol';
-// export const CoercivePrimitiveStrArray = ['boolean', 'number', 'symbol'];
+export const CoercivePrimitiveStrArray = ['boolean', 'number', 'symbol'];
 export type CoercivePrimitiveType = boolean | number | symbol;
 
 /**
@@ -425,11 +434,11 @@ export interface ISelectors {
  * @description Builder for all commands defined in zenobia config.
  *
  * @export
- * @interface ICommander
+ * @interface ICommandConverter
  */
-export interface ICommander {
-  buildNamedCommand(commandName: string, commandsNode: Node): PlainObject[];
-  buildCommands(commandsNode: Node): PlainObject[];
+export interface ICommandConverter {
+  convertNamedCommand(commandName: string, commandsNode: Node): PlainObject[];
+  convertAllCommands(commandsNode: Node): PlainObject[];
 }
 
 /**
@@ -437,11 +446,11 @@ export interface ICommander {
  * from xml configuration).
  *
  * @export
- * @interface ICommanderFactory
+ * @interface ICommandConverterFactory
  */
-export interface ICommanderFactory {
+export interface ICommandConverterFactory {
   (converter: IConverter, specSvc: ISpecService, parseInfo: IParseInfo,
-    xpath: ISelectors): ICommander;
+    xpath: ISelectors): ICommandConverter;
 }
 
 /**
@@ -450,19 +459,17 @@ export interface ICommanderFactory {
  * @export
  * @interface IDynamicCli
  * @template C: represents the cli interface as defined by the user
- * @template I: represent the cli API being used
+ * @template I: represents the cli API being used
  */
 export interface IDynamicCli<C, I> {
   load(applicationConfigPath: string): string;
   peek(processArgv?: string[]): string;
-  create(): ICommander;
-  build(xmlContent: string, converter: IConverter, processArgv?: string[]): I;
+  build(xmlContent: string, processArgv?: string[]): I;
   argv(): C;
-  instance: I;
 }
 
 /**
- * `@description The API interface for Yargs
+ * @description The API interface for Yargs
  *
  * @export
  * @interface IYargsArgumentsCli
@@ -471,17 +478,6 @@ export interface IYargsArgumentsCli {
   [x: string]: unknown;
   _: string[] | string;
   $0: string;
-}
-
-/**
- * @description Additional argument info which describes the dynamic cli
- *
- * @export
- * @interface IArgumentInfo
- */
-export interface IArgumentInfo {
-  defaultCommand?: string;
-  positionalArguments?: string[];
 }
 
 // -----------------------------------------------------------------------------
