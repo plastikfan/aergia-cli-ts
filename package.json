@@ -83,7 +83,7 @@
     "@types/chai": "^4.2.11",
     "@types/dirty-chai": "^2.0.2",
     "@types/mocha": "^7.0.2",
-    "@types/sinon": "^7.5.2",
+    "@types/sinon": "^9.0.0",
     "@types/sinon-chai": "^3.2.3",
     "@typescript-eslint/eslint-plugin": "^2.25.0",
     "@typescript-eslint/parser": "^2.25.0",
